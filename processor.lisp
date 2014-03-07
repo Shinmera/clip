@@ -45,7 +45,8 @@
 
 (defun scan-element (element)
   (loop for child across (dom:child-nodes element)
-        unless (dom:text-node-p child)
+        unless (or (dom:text-node-p child)
+                   (dom:comment-p child))
           do (block current-recurse
                (when-let ((attr (pop-attribute child "block")))
                  (invoke-block attr child)
@@ -61,6 +62,12 @@
         (error 'no-such-block-error :name block))
       (funcall processor element))))
 
+(defun make-form-functions (form-definitions)
+  `(list ,@(loop for def in form-definitions
+                 collect (destructuring-bind (symbol args &rest body) def
+                           `(cons ',(intern (string symbol) "CLIP-USER")
+                                  #'(lambda ,args ,@body))))))
+
 (defmacro define-transforming-processor (name (elementvar &rest args) &body transforms)
   `(define-block-processor ,name (,elementvar ,@args)
      ,@transforms
@@ -73,30 +80,35 @@
 
 (defmacro define-form-processor (name (elementvar &rest args) &rest form-functions)
   `(define-block-processor ,name (,elementvar ,@args)
-     (let ((*form-table* (append ,form-functions *form-table*)))
+     (let ((*form-table* (append ,(make-form-functions form-functions) *form-table*)))
        (scan-element ,elementvar)
        (eval-element ,elementvar))))
 
 (defun eval-element (element)
   (when-let ((attr (pop-attribute element "form")))
     ;; FIXME: Symbol pollution?
-    (let ((*form-element* element))
+    (let ((*form-element* element)
+          (*package* (find-package "CLIP-USER")))
       (invoke-form (read-from-string (format NIL "(~a)" attr)) element)))
   (loop for child across (dom:child-nodes element)
-        unless (dom:text-node-p child)
+        unless (or (dom:text-node-p child)
+                   (dom:comment-p child))
           do (eval-element child)))
 
 (defun invoke-form (form element)
   (typecase form
-    ((or number string null symbol) form)
+    (null)
     (list (destructuring-bind (name &rest args) form
             (let ((function (cdr (assoc name *form-table*))))
               (unless function
                 (error 'no-such-form-error :name name))
               (let ((args (mapcar #'(lambda (a) (invoke-form a element)) args)))
-                (apply function args)))))))
+                (handler-bind
+                    ((error #'(lambda (err) (format T "ERROR ON FORM (~a ~{~a~^ ~})" name args))))
+                  (apply function args))))))
+    (T form)))
 
 (defmacro define-standard-form (name (&rest lambda-list) &body body)
-  `(setf-alist *form-table* ',name
+  `(setf-alist *form-table* ',(intern (string name) "CLIP-USER")
                #'(lambda ,lambda-list
                    ,@body)))
