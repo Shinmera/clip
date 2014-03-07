@@ -38,3 +38,5 @@
    #:define-iterating-fill-processor
    #:define-standard-fill-form)
   )
+
+(defpackage #:clip-user)
