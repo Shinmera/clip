@@ -19,7 +19,8 @@
   :components ((:file "package")
                (:file "processor")
                (:file "blocks")
-               (:file "fill"))
+               (:file "fill")
+               (:file "indent"))
   :depends-on (:cxml
                :alexandria
                :split-sequence))
