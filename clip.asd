@@ -14,10 +14,11 @@
   :license "Artistic"
   :author "Nicolas Hafner <shinmera@tymoon.eu>"
   :maintainer "Nicolas Hafner <shinmera@tymoon.eu>"
-  :description "A powerful HTML templating engine using lQuery."
+  :description "A powerful HTML templating engine using CXML."
   :serial T
   :components ((:file "package")
                (:file "processor")
                (:file "default-blocks"))
-  :depends-on (:lquery
-               :alexandria))
+  :depends-on (:cxml
+               :alexandria
+               :split-sequence))

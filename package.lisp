@@ -7,5 +7,5 @@
 (in-package #:cl-user)
 (defpackage #:clip
   (:nicknames #:org.tymoonnext.clip)
-  (:use #:cl #:alexandria #:lquery)
+  (:use #:cl #:alexandria #:split-sequence)
   (:export))
