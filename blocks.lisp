@@ -23,3 +23,8 @@
 
 (define-standard-form funcall (function &rest args)
   (apply function args))
+
+(define-standard-form progn (&rest forms)
+  (loop for form in forms
+        for result = (invoke-form form *form-element*)
+        finally (return result)))
