@@ -6,19 +6,22 @@
 
 (in-package #:org.tymoonnext.clip)
 
-(defvar *block-table* ())
-(defvar *form-table* ())
-(defvar *form-element* NIL)
+(defvar *block-table* () "Global block table used during clip's parsing.")
+(defvar *form-table* () "Global form table used during clip's form processing.")
+(defvar *form-element* NIL "Form element bound to the currently executing element.")
 
 (define-condition no-such-block-error (error)
   ((%name :initarg :name :accessor name))
-  (:report (lambda (c s) (format s "No block ~s found in block table." (name c)))))
+  (:report (lambda (c s) (format s "No block ~s found in block table." (name c))))
+  (:documentation "Error when a document tries to define a block that cannot be found in the current block table."))
 
 (define-condition no-such-form-error (error)
   ((%name :initarg :name :accessor name))
-  (:report (lambda (c s) (format s "No fill function ~s found in fill table." (name c)))))
+  (:report (lambda (c s) (format s "No fill function ~s found in fill table." (name c))))
+  (:documentation "Error when a document tries to invoke a form that cannot be found in the current form table."))
 
 (defmacro setf-alist (alist key val)
+  "Adds or sets an alist key/value pair."
   (with-gensyms (g-find g-key g-val)
     `(let* ((,g-key ,key)
             (,g-val ,val)
@@ -28,13 +31,22 @@
            (push (cons ,g-key ,g-val) ,alist)))))
 
 (defmacro define-block-processor (name (elementvar &rest attributes) &body body)
-  `(setf-alist *block-table* ,(intern (string-upcase name) "KEYWORD")
+  "Defines a new block processor of NAME.
+
+NAME       --- A symbol (re-interned in CLIP-USER) to identify the block.
+ELEMENTVAR --- A symbol bound to the block defining element on processing.
+ATTRIBUTES --- A list of variables that will be bound to their same-named
+               attributes of the block on processing.
+BODY       --- Forms to be executed on processing. Be aware that without
+               explicitly calling SCAN-ELEMENT, the recursion stops."
+  `(setf-alist *block-table* ,(intern (string-upcase name) "CLIP-USER")
                #'(lambda (,elementvar)
                    (let ,(loop for attr in attributes
                                collect `(,attr (pop-attribute ,elementvar ,(string-downcase attr))))
                      ,@body))))
 
 (defun pop-attribute (element attribute)
+  "Pops an attribute from a DOM element and returns its value."
   (let* ((attribute (string-downcase attribute))
          (return (dom:get-attribute element attribute)))
     (if (string= "" return)
@@ -44,6 +56,7 @@
           return))))
 
 (defun scan-element (element)
+  "Scans the element for defined blocks and transforms them accoridngly."
   (loop for child across (dom:child-nodes element)
         unless (or (dom:text-node-p child)
                    (dom:comment-p child))
@@ -54,7 +67,9 @@
                (scan-element child))))
 
 (defun invoke-block (block element)
-  (let ((name (find-symbol (string-upcase block) "KEYWORD")))
+  "Searches for BLOCK and if found, invokes it with ELEMENT.
+If the block cannot be found, a NO-SUCH-BLOCK-ERROR is signalled."
+  (let ((name (find-symbol (string-upcase block) "CLIP-USER")))
     (unless name
       (error 'no-such-block-error :name block))
     (let ((processor (cdr (assoc name *block-table*))))
@@ -63,28 +78,41 @@
       (funcall processor element))))
 
 (defun make-form-functions (form-definitions)
+  "Transforms temporary form declarations used in
+DEFINE-FORM-PROCESSOR in their proper ALIST representation."
   `(list ,@(loop for def in form-definitions
                  collect (destructuring-bind (symbol args &rest body) def
                            `(cons ',(intern (string symbol) "CLIP-USER")
                                   #'(lambda ,args ,@body))))))
 
 (defmacro define-transforming-processor (name (elementvar &rest args) &body transforms)
+  "Helper macro that defines a recursing, but transforming
+block processor. See DEFINE-BLOCK-PROCESSOR"
   `(define-block-processor ,name (,elementvar ,@args)
      ,@transforms
      (scan-element ,elementvar)))
 
 (defmacro define-binding-processor (name (elementvar &rest args) &body bindings)
+  "Helper macro that defines a recursing block processor that
+binds the given bindings before recursing deeper.
+See DEFINE-BLOCK-PROCESSOR"
   `(define-block-processor ,name (,elementvar ,@args)
      (let* ,bindings
        (scan-element ,elementvar))))
 
 (defmacro define-form-processor (name (elementvar &rest args) &rest form-functions)
+  "Defines a form executing, recursing block processor. Form 
+functions can be (re)bound locally here to create a special
+form environment. See DEFINE-BLOCK-PROCESSOR"
   `(define-block-processor ,name (,elementvar ,@args)
      (let ((*form-table* (append ,(make-form-functions form-functions) *form-table*)))
        (scan-element ,elementvar)
        (eval-element ,elementvar))))
 
 (defun eval-element (element)
+  "\"Evaluates\" the given element by searching for FORM
+attributes and calling INVOKE-FORM if such a form can be
+found. Recursively calls EVAL-ELEMENT on child elements."
   (when-let ((attr (pop-attribute element "form")))
     ;; FIXME: Symbol pollution?
     (let ((*form-element* element)
@@ -96,6 +124,12 @@
           do (eval-element child)))
 
 (defun invoke-form (form element)
+  "Invokes or \"evaluates\" the given form. This is only
+specially handled if the form is a list, otherwise the
+form itself is returned. When a list, the first element
+is assumed to be the form's name. If this form can indeed
+be found in the form-table, it is invoked. Otherwise a
+NO-SUCH-FORM-ERROR is signalled. "
   (typecase form
     (null)
     (list (destructuring-bind (name &rest args) form
@@ -109,6 +143,8 @@
     (T form)))
 
 (defmacro define-standard-form (name (&rest lambda-list) &body body)
+  "Defines a standard form that should normally be visible
+for all form blocks, unless explicitly unbound or reset."
   `(setf-alist *form-table* ',(intern (string name) "CLIP-USER")
                #'(lambda ,lambda-list
                    ,@body)))
