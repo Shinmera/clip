@@ -39,7 +39,7 @@ ATTRIBUTES --- A list of variables that will be bound to their same-named
                attributes of the block on processing.
 BODY       --- Forms to be executed on processing. Be aware that without
                explicitly calling SCAN-ELEMENT, the recursion stops."
-  `(setf-alist *block-table* ,(intern (string-upcase name) "CLIP-USER")
+  `(setf-alist *block-table* ',(intern (string-upcase name) "CLIP-USER")
                #'(lambda (,elementvar)
                    (let ,(loop for attr in attributes
                                collect `(,attr (pop-attribute ,elementvar ,(string-downcase attr))))
