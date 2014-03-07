@@ -18,7 +18,8 @@
   :serial T
   :components ((:file "package")
                (:file "processor")
-               (:file "default-blocks"))
+               (:file "blocks")
+               (:file "fill"))
   :depends-on (:cxml
                :alexandria
                :split-sequence))
