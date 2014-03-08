@@ -14,12 +14,9 @@
   :license "Artistic"
   :author "Nicolas Hafner <shinmera@tymoon.eu>"
   :maintainer "Nicolas Hafner <shinmera@tymoon.eu>"
-  :description "A powerful HTML templating engine using CXML."
+  :description "An HTML templating engine using CXML."
   :serial T
   :components ((:file "package")
-               (:file "processor")
-               (:file "blocks")
-               (:file "fill")
                (:file "indent"))
   :depends-on (:cxml
                :alexandria
