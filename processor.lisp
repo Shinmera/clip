@@ -6,8 +6,6 @@
 
 (in-package #:org.tymoonnext.clip)
 
-(defvar *target*)
-
 (defun process (target &rest fields)
   (let ((*clipboard* (make-clipboard fields))
         (*target* (etypecase target

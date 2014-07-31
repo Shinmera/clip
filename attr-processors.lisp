@@ -6,6 +6,8 @@
 
 (in-package #:org.tymoonnext.clip)
 
+(defvar *target*)
+
 (defgeneric process-attribute (attribute value))
 
 (defmethod process-attribute (attribute value)
