@@ -6,14 +6,12 @@
   <body>
     <h1>Select an option:</h1>
     <form>
-      <ul>
-        <iterate over="options">
-          <li>
-            <input type="radio" lquery="(val id)" name="option" />
-            <span class="votes" lquery="(text votes)">0</span>
-            <span class="title" lquery="(text title)">Title</span>
-          </li>
-        </iterate>
+      <ul iterate="options">
+        <li>
+          <input type="radio" lquery="(val id)" name="option" />
+          <span class="votes" lquery="(text votes)">0</span>
+          <span class="title" lquery="(text title)">Title</span>
+        </li>
       </ul>
       <input type="submit" value="Vote!" />
     </form>
