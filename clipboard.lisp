@@ -65,3 +65,6 @@
   (if (eql symbol '*)
       *clipboard*
       (clipboard symbol)))
+
+(defun resolve-attribute (node attr)
+  (resolve-value (read-from-string (plump:attribute node attr))))
