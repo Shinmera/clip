@@ -50,7 +50,8 @@
                     for val being the hash-values of (plump:attributes node)
                     when (string= val "") do (return key))))
     (plump:remove-attribute node var)
-    (process-attribute :iterate var)))
+    (process-attribute :iterate var)
+    (process-attributes node)))
 
 (define-tag-processor expand (node)
   (process-attributes node)
