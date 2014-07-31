@@ -14,10 +14,12 @@
   :license "Artistic"
   :author "Nicolas Hafner <shinmera@tymoon.eu>"
   :maintainer "Nicolas Hafner <shinmera@tymoon.eu>"
-  :description "An HTML templating engine using CXML."
+  :description "An HTML templating engine using Plump."
   :serial T
   :components ((:file "package")
-               (:file "indent"))
-  :depends-on (:cxml
-               :alexandria
-               :split-sequence))
+               (:file "toolkit")
+               (:file "clipboard")
+               (:file "attr-processors")
+               (:file "tag-processors")
+               (:file "processor"))
+  :depends-on (:lquery))

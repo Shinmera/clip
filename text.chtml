@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Clip Test</title>
+  </head>
+  <body>
+    <h1>Select an option:</h1>
+    <form>
+      <ul>
+        <iterate options>
+          <li>
+            <input type="radio" lquery="(val id)" name="option" />
+            <span class="votes" lquery="(text votes)">0</span>
+            <span class="title" lquery="(text title)">Title</span>
+          </li>
+        </iterate>
+      </ul>
+      <input type="submit" value="Vote!" />
+    </form>
+  </body>
+</html>
