@@ -46,9 +46,7 @@
   (process-children node))
 
 (define-tag-processor iterate (node)
-  (let* ((var (loop for key being the hash-keys of (plump:attributes node)
-                    for val being the hash-values of (plump:attributes node)
-                    when (string= val "") do (return key))))
+  (let ((var (plump:attribute node "over")))
     (plump:remove-attribute node var)
     (process-attribute :iterate var)
     (process-attributes node)))
@@ -59,3 +57,5 @@
         (or (plump:attribute node "to") "expand"))
   (plump:remove-attribute node "to")
   (process-node node))
+
+;; Todo: Tag splicing, conditionals
