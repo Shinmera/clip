@@ -62,4 +62,6 @@
 (defmethod resolve-value (object) object)
 
 (defmethod resolve-value ((symbol symbol))
-  (clipboard symbol))
+  (if (eql symbol '*)
+      *clipboard*
+      (clipboard symbol)))
