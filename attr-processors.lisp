@@ -48,5 +48,16 @@
   (plump:remove-attribute node "eval"))
 
 (define-attribute-processor iterate (node value)
-  (plump:set-attribute node value "")
-  (process-tag :iterate node))
+  (let ((val (resolve-value (read-from-string value)))
+        (new-children (plump:make-child-array))
+        (target (plump:first-element node)))
+    (flet ((process (item)
+             (let ((*target* (plump:clone-node target))
+                   (*clipboard* item))
+               (process-node *target*)
+               (vector-push-extend *target* new-children))))
+      (etypecase val
+        (list (loop for item in val do (process item)))
+        (vector (loop for item across val do (process item)))))
+    (setf (plump:children node) new-children)
+    (plump:remove-attribute node "iterate")))
