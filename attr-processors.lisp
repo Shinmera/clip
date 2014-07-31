@@ -33,10 +33,7 @@
          (T (apply (or (find-symbol (string func) :clip) func)
                    (mapcar #'%resolve-lquery-arg args))))))
     (keyword arg)
-    (symbol (if (eql arg '*)
-                *clipboard*
-                (clipboard arg)))
-    (T arg)))
+    (T (resolve-value arg))))
 
 (define-attribute-processor lquery (node value)
   (let ((actions (typecase value
@@ -78,3 +75,7 @@
                 new-children)))
     (setf (plump:children node) new-children)
     (plump:remove-attribute node "do")))
+
+(define-attribute-processor as (node value)
+  (setf (plump:tag-name node) value)
+  (plump:remove-attribute node "as"))
