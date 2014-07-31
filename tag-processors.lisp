@@ -21,18 +21,21 @@
 
 (defun process-children (node)
   (loop for child across (plump:children node)
-        do (let ((*target* child))
-             (process-node child))))
+        do (process-node child))
+  node)
 
 (defmethod process-tag (tag (node plump:element))
   (process-attributes node)
-  (process-children node))
+  (process-children node)
+  node)
 
 (defun process-node (node)
-  (etypecase node
-    (plump:element (process-tag (make-keyword (string-upcase (plump:tag-name node))) node))
-    (plump:nesting-node (process-children node))
-    (plump:node)))
+  (let ((*target* node))
+    (etypecase node
+      (plump:element (process-tag (make-keyword (string-upcase (plump:tag-name node))) node))
+      (plump:nesting-node (process-children node))
+      (plump:node))
+    node))
 
 (define-tag-processor noop (node))
 
@@ -48,3 +51,10 @@
                     when (string= val "") do (return key))))
     (plump:remove-attribute node var)
     (process-attribute :iterate var)))
+
+(define-tag-processor expand (node)
+  (process-attributes node)
+  (setf (plump:tag-name node)
+        (or (plump:attribute node "to") "expand"))
+  (plump:remove-attribute node "to")
+  (process-node node))
