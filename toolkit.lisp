@@ -6,6 +6,9 @@
 
 (in-package #:org.tymoonnext.clip)
 
+(defun concat (list)
+  (format NIL "~{~a~^ ~}" list))
+
 (defun make-keyword (name)
   (let ((name (string name)))
     (or (find-symbol name "KEYWORD")
