@@ -32,7 +32,9 @@
          (function (symbol-function (first args)))
          (T (apply (or (find-symbol (string func) :clip) func)
                    (mapcar #'%resolve-lquery-arg args))))))
-    (symbol (clipboard arg))
+    (symbol (if (eql arg '*)
+                *clipboard*
+                (clipboard arg)))
     (T arg)))
 
 (define-attribute-processor lquery (node value)
@@ -52,12 +54,24 @@
         (new-children (plump:make-child-array))
         (target (plump:first-element node)))
     (flet ((process (item)
-             (let ((*target* (plump:clone-node target))
-                   (*clipboard* item))
-               (process-node *target*)
-               (vector-push-extend *target* new-children))))
+             (let ((*clipboard* item))
+               (vector-push-extend
+                (process-node (plump:clone-node target))
+                new-children))))
       (etypecase val
         (list (loop for item in val do (process item)))
         (vector (loop for item across val do (process item)))))
     (setf (plump:children node) new-children)
     (plump:remove-attribute node "iterate")))
+
+(define-attribute-processor do (node value)
+  (let ((val (read-from-string (format NIL "(~a)" value)))
+        (new-children (plump:make-child-array))
+        (target (plump:first-element node)))
+    (loop for item in val
+          do (let ((*clipboard* item))
+               (vector-push-extend
+                (process-node (plump:clone-node target))
+                new-children)))
+    (setf (plump:children node) new-children)
+    (plump:remove-attribute node "do")))
