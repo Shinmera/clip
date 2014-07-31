@@ -32,18 +32,21 @@
          (function (symbol-function (first args)))
          (T (apply (or (find-symbol (string func) :clip) func)
                    (mapcar #'%resolve-lquery-arg args))))))
+    (keyword arg)
     (symbol (if (eql arg '*)
                 *clipboard*
                 (clipboard arg)))
     (T arg)))
 
 (define-attribute-processor lquery (node value)
-  (let ((actions (read-from-string (format NIL "(~a)" value))))
+  (let ((actions (typecase value
+                   (list (list value))
+                   (string (read-from-string (format NIL "(~a)" value))))))
+    (plump:remove-attribute node "lquery")
     (loop with node = (make-proper-vector :size 1 :initial-element node :fill-pointer T)
           for (func . args) in actions
           do (apply (or (find-symbol (string func) :lquery-funcs) func)
-                    node (mapcar #'%resolve-lquery-arg args))))
-  (plump:remove-attribute node "lquery"))
+                    node (mapcar #'%resolve-lquery-arg args)))))
 
 (define-attribute-processor eval (node value)
   (eval (read-from-string value))
