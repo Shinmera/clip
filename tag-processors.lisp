@@ -101,16 +101,22 @@
 
 (define-tag-processor if (node)
   (process-attributes node)
-  (let* ((test (resolve-value (read-from-string (plump:attribute node "test"))))
-         (parent (plump:parent node))
+  (let* ((parent (plump:parent node))
          (pos (position node (plump:children parent)))
-         (then) (else))
+         (then) (else) (test (plump:attribute node "test")))
+    ;; Gather elements
     (loop for child across (plump:children node)
           when (plump:element-p child)
-            do (when (and (not then) (string-equal (plump:tag-name child) "then"))
+            do (when (and (not test) (string-equal (plump:tag-name child) "test"))
+                 (setf test (plump:text child)))
+               (when (and (not then) (string-equal (plump:tag-name child) "then"))
                  (setf then child))
                (when (and (not else) (string-equal (plump:tag-name child) "else"))
                  (setf else child)))
+    ;; Parse test
+    (when (stringp test)
+      (setf test (resolve-value (read-from-string test))))
+    ;; Perform splice
     (flet ((splice (children)
              (when (< 0 (length children))
                (splice-into parent pos children)
