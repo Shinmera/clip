@@ -87,16 +87,13 @@ is done."
     (process-children node)))
 
 (define-tag-processor iterate (node)
+  (process-attributes node)
   (let ((var (plump:attribute node "over")))
     (plump:remove-attribute node var)
-    (process-attribute "iterate" var)
-    (process-attributes node)))
+    (process-attribute "iterate" var)))
 
 (define-tag-processor expand (node)
   (process-attributes node)
-  (setf (plump:tag-name node)
-        (or (plump:attribute node "to") "expand"))
-  (plump:remove-attribute node "to")
   (process-node node))
 
 (defun splice-into (node pos new-children)
