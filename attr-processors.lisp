@@ -86,18 +86,6 @@ See PROCESS-ATTRIBUTE."
     (setf (plump:children node) new-children)
     (plump:remove-attribute node "iterate")))
 
-(define-attribute-processor do (node value)
-  (let ((val (read-from-string (format NIL "(~a)" value)))
-        (new-children (plump:make-child-array))
-        (target (plump:first-element node)))
-    (loop for item in val
-          do (let ((*clipboard* item))
-               (vector-push-extend
-                (process-node (plump:clone-node target))
-                new-children)))
-    (setf (plump:children node) new-children)
-    (plump:remove-attribute node "do")))
-
 (define-attribute-processor as (node value)
   (setf (plump:tag-name node) value)
   (plump:remove-attribute node "as"))
