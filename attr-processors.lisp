@@ -7,6 +7,7 @@
 (in-package #:org.tymoonnext.clip)
 
 (defvar *target*)
+(defvar *target-counter* 0)
 
 (defgeneric process-attribute (attribute value))
 
@@ -26,14 +27,6 @@
 
 (defun %resolve-lquery-arg (arg)
   (typecase arg
-    (list
-     (let ((func (car arg))
-           (args (cdr arg)))
-       (case func
-         (quote (first args))
-         (function (symbol-function (first args)))
-         (T (apply (or (find-symbol (string func) :clip) func)
-                   (mapcar #'%resolve-lquery-arg args))))))
     (keyword arg)
     (T (resolve-value arg))))
 
@@ -81,3 +74,6 @@
 (define-attribute-processor as (node value)
   (setf (plump:tag-name node) value)
   (plump:remove-attribute node "as"))
+
+(define-attribute-processor count (node value)
+  (setf (plump:attribute node "count") (princ-to-string *target-counter*)))

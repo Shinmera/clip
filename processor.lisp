@@ -8,6 +8,7 @@
 
 (defun process (target &rest fields)
   (let ((*clipboard* (make-clipboard fields))
+        (*target-counter* 0)
         (*target* (etypecase target
                     (plump:node target)
                     (pathname (plump:parse target))
