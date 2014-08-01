@@ -6,30 +6,41 @@
 
 (in-package #:org.tymoonnext.clip)
 
-(defvar *clipboard*)
+(defvar *clipboard* NIL
+  "Template storage object.")
 
-(defun make-clipboard (fields)
+(defun make-clipboard (&rest fields)
+  "Creates a new clipboard using the specified fields (like a plist)."
   (let ((table (make-hash-table)))
     (loop for (key val) on fields by #'cddr
           do (setf (gethash key table) val))
     table))
 
-(defgeneric clip (object field))
-(defgeneric (setf clip) (value object field))
+(defgeneric clip (object field)
+  (:documentation "Generic object accessor.
+If you want to get special treatment of objects or types, define your own methods on this."))
+
+(defgeneric (setf clip) (value object field)
+  (:documentation "Generic object setter.
+If you want to get special treatment of objects or types, define your own methods on this."))
 
 (defun clipboard (field)
+  "Shorthand for (CLIP *CLIPBOARD* FIELD)"
   (clip *clipboard* field))
 
 (defun (setf clipboard) (value field)
+  "Shorthand for (SETF (CLIP *CLIPBOARD* FIELD) VALUE)"
   (setf (clip *clipboard* field) value))
 
 (defmethod clip ((table hash-table) field)
+  "Generic hash-table accessor."
   (gethash field table))
 
 (defmethod (setf clip) (value (table hash-table) field)
   (setf (gethash field table) value))
 
 (defmethod clip ((model list) field)
+  "Generic alist or plist accessor."
   (cond
     ((keywordp (first model))
      (getf model (make-keyword field)))
@@ -48,6 +59,7 @@
      (error "Model is of type LIST, but is neither an ALIST or PLIST."))))
 
 (defmethod clip ((model standard-object) field)
+  "Generic slot accessor."
   (let ((field (find-symbol (string field)
                             (symbol-package (class-name (class-of model))))))
     (if field (slot-value model field))))
@@ -57,16 +69,37 @@
                             (symbol-package (class-name (class-of model))))))
     (if field (setf (slot-value model field) value))))
 
-(defgeneric resolve-value (object))
+(defgeneric resolve-value (object)
+  (:documentation "Attempts to resolve the object to a specific value.
+This is usually used in combination with READ-FROM-STRING of an attribute value."))
 
-(defmethod resolve-value (object) object)
+(defmethod resolve-value (object)
+  "Default fallback for unrecognized objects; simply returns it."
+  object)
 
 (defmethod resolve-value ((symbol symbol))
+  "Handler for symbols.
+If the symbol is EQL to '* the *CLIPBOARD* is returned,
+otherwise the value of (CLIPBOARD SYMBOL) is returned."
   (if (eql symbol '*)
       *clipboard*
       (clipboard symbol)))
 
 (defmethod resolve-value ((list list))
+  "Handler for lists, aka function calls.
+
+The function call is decided upon the CAR of the list.
+The following cases are handled:
+
+QUOTE     Returns the first argument
+FUNCTION  Returns the symbol-function of the first argument
+OR        Simulated version of the OR macro.
+AND       Simulated version of the AND macro.
+
+Otherwise the symbol is looked for in the :CLIP package
+and then the current *PACKAGE*. If found, the function is
+applied with all arguments of the list (which are first
+all individually passed to RESOLVE-VALUE too)."
   (let ((func (car list))
         (args (cdr list)))
     (case func
@@ -83,4 +116,6 @@
                 (mapcar #'resolve-value args))))))
 
 (defun resolve-attribute (node attr)
+  "Shorthand to resolve the value of an attibute.
+See RESOLVE-VALUE."
   (resolve-value (read-from-string (plump:attribute node attr))))

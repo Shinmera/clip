@@ -7,7 +7,8 @@
 (in-package #:org.tymoonnext.clip)
 
 (defun process (target &rest fields)
-  (let ((*clipboard* (make-clipboard fields))
+  "Processes all clip markup on the target with the given FIELDS used to initialise the clipboard."
+  (let ((*clipboard* (apply #'make-clipboard fields))
         (*target-counter* 0)
         (*target* (etypecase target
                     (plump:node target)

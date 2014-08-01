@@ -6,24 +6,50 @@
 
 (in-package #:org.tymoonnext.clip)
 
-(defvar *attribute-processors* (make-hash-table :test 'equalp))
-(defvar *target*)
-(defvar *target-counter* 0)
+(defvar *attribute-processors* (make-hash-table :test 'equalp)
+  "Global registry of attribute processors.
+
+This has to be an EQUALP hash-table with the attribute name as keys
+and functions that accept two arguments (node attribute-value) as
+values. Binding this variable can be useful to establish local
+attributes.")
+
+(defvar *target* NIL
+  "This variable is bound to whatever node is currently being processed.")
+
+(defvar *target-counter* 0
+  "This counter is upped whenever process-node is called.")
 
 (defun attribute-processor (attribute)
+  "Returns the processor function for the requested attribute if one is registered.
+Otherwise returns NIL. See *ATTRIBUTE-PROCESSORS*."
   (gethash attribute *attribute-processors*))
+
 (defun (setf attribute-processor) (func attribute)
+  "Sets the attribute-processor bound to the given attribute to the specified function.
+See *ATTRIBUTE-PROCESSORS*."
   (setf (gethash attribute *attribute-processors*) func))
 
 (defun process-attribute (attribute value)
+  "Processes the specified attribute using the given value.
+If no attribute processor can be found, nothing is done.
+See *TARGET*, *ATTRIBUTE-PROCESSORS*."
   (let ((func (attribute-processor attribute)))
     (when func (funcall func *target* value))))
 
 (defmacro define-attribute-processor (attribute (node value) &body body)
+  "Defines a new attribute processor.
+
+ATTRIBTUE --- A symbol or string that matches the attribute to process (case-insensitive)
+NODE      --- The current node is bound to this symbol.
+VALUE     --- The value of the attribute is bound to this symbol.
+BODY      ::= form*"
   `(setf (attribute-processor ,(string attribute))
          #'(lambda (,node ,value) ,@body)))
 
 (defun process-attributes (node)
+  "Processes all attributes on the node.
+See PROCESS-ATTRIBUTE."
   (maphash #'process-attribute (plump:attributes node)))
 
 (defun %resolve-lquery-arg (arg)

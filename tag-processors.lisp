@@ -6,14 +6,28 @@
 
 (in-package #:org.tymoonnext.clip)
 
-(defvar *tag-processors* (make-hash-table :test 'equalp))
+(defvar *tag-processors* (make-hash-table :test 'equalp)
+  "Global registry of tag processors.
+
+This has to be an EQUALP hash-table with the tag name as keys
+and functions that accept one argument (the node) as
+values. Binding this variable can be useful to establish local
+tags.")
 
 (defun tag-processor (tag)
+  "Returns the processor function for the requested tag if one is registered.
+Otherwise returns NIL. See *TAG-PROCESSORS*."
   (gethash tag *tag-processors*))
+
 (defun (setf tag-processor) (func tag)
+  "Sets the tag-processor bound to the given tag-name to the specified function.
+See *TAG-PROCESSORS*."
   (setf (gethash tag *tag-processors*) func))
 
 (defun process-tag (tag node)
+  "Processes the specified node as the given tag.
+If no tag processor can be found, PROCESS-ATTRIBUTES and PROCESS-CHILDREN is called.
+See *TAG-PROCESSORS*."
   (let ((func (tag-processor tag)))
     (cond
       (func (funcall func node))
@@ -21,10 +35,22 @@
          (process-children node)))))
 
 (defmacro define-tag-processor (tag (node) &body body)
+  "Defines a new attribute processor.
+
+TAG    --- A symbol or string that matches the tag name to process (case-insensitive)
+NODE   --- The node to process is bound to this symbol
+BODY   ::= form*"
   `(setf (tag-processor ,(string tag))
          #'(lambda (,node) ,@body)))
 
 (defun process-children (node)
+  "Calls PROCESS-NODE on all childrens of the passed node.
+
+This takes some care to make sure that splicing into the childrens array
+of the node is possible. However, note that inserting children before the
+node that is currently being processed will most likely lead to horrors.
+If such functionality is indeed ever needed (I hope not), this system
+needs to be rewritten to somehow be able to cope with such scenarios. "
   (loop for i from 0 ;; We do this manually to allow growing size of the array.
         while (< i (length (plump:children node)))
         for child = (aref (plump:children node) i)
@@ -32,12 +58,21 @@
   node)
 
 (defun process-node (node)
-  (incf *target-counter*)
+  "Processes the passed node.
+
+Depending on type the following is done:
+PLUMP:ELEMENT       PROCESS-TAG is called.
+PLUMP:NESTING-NODE  PROCESS-CHILDREN is called.
+PLUMP:NODE          Nothing is done.
+T                   An error is signalled.
+Any call to this also increases the *TARGET-COUNTER* regardless of what
+is done."
   (let ((*target* node))
     (etypecase node
       (plump:element (process-tag (plump:tag-name node) node))
       (plump:nesting-node (process-children node))
       (plump:node))
+    (incf *target-counter*)
     node))
 
 (define-tag-processor noop (node)
