@@ -72,6 +72,13 @@
     (case func
       (quote (first args))
       (function (symbol-function (first args)))
+      (or (loop for arg in args
+                thereis (resolve-value arg)))
+      (and (loop for arg in args
+                 for val = (resolve-value arg)
+                 when (not val)
+                   do (return)
+                 finally (return val)))
       (T (apply (or (find-symbol (string func) :clip) func)
                 (mapcar #'resolve-value args))))))
 
