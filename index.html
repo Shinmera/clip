@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8"/>
+    <title>CLIP</title>
+    <style type="text/css">
+      code a{text-decoration:none;}
+      h1{display:inline-block;font-size: 28pt;margin-bottom:0;}
+      code{font-family: Consolas, Inconsolata, monospace;}
+      h4{display: inline-block;margin:0;padding:0;}
+      ul{list-style: none;}
+      .package li{margin-bottom: 20px;}
+      .package pre{margin: 0 0 0 10px; white-space: pre-wrap;}
+      .package .nicknames{font-size: 12pt; font-weight: normal;}
+      table{margin: 20px;}
+      td{padding-bottom: 10px;}
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1><img src="clip-logo.png" alt="clip"/></h1>
+      <span>0.2.1</span>
+      <p>An HTML templating engine using Plump.</p>
+    </header>
+    <div id="content">
+      <article>
+        <documentate>
+          <span><h2>About Clip</h2>
+
+<p>Clip is an attempt at a templating library that allows you to write templates in a way that is both accessible to direct webdesign and flexible. The main idea is to incorporate transformation commands into an HTML file through tags and attributes. Clip is heavily dependant on <a href="https://shinmera.github.io/plump">Plump</a> and <a href="https://shinmera.github.io/lquery">lQuery</a>. </p>
+
+<h2>How To</h2>
+
+<p>Load Clip through ASDF or Quicklisp.</p>
+
+<p><code>(ql:quickload :clip)</code></p>
+
+<p>To process a template, simply call <code><a href="#CLIP:PROCESS">process</a></code>:</p>
+
+<p><code>(<a href="#CLIP:PROCESS">clip:process</a> #p&quot;my-template.html&quot;)</code></p>
+
+<p>You may also pass in pure strings or plump nodes. Most likely you will want to include some kind of data in your template. Data in Clip is managed through a central <code><a href="#CLIP:*CLIPBOARD*">*CLIPBOARD*</a></code>. The additional arguments you pass to <code><a href="#CLIP:PROCESS">PROCESS</a></code> are entered into the initial clipboard like a plist (key and value alternating).</p>
+
+<p>Depending on the current tag environment and how the template is processed at the time these values can come into play. Most of the time, entering the name as passed into <code><a href="#CLIP:PROCESS">PROCESS</a></code> in the template as an attribute value will then evaluate to the according value using <code><a href="#CLIP:RESOLVE-VALUE">RESOLVE-VALUE</a></code>. In the case of a symbol this then delegates to <code><a href="#CLIP:CLIP">CLIP</a></code>, which returns the value stored in the clipboard.</p>
+
+<p>The value returned by <code><a href="#CLIP:PROCESS">PROCESS</a></code> is the node you passed into it. You can parse this back into a string using <code>PLUMP:SERIALIZE</code> or lQuery's <code>WRITE-TO-FILE</code>.</p>
+
+<h2>Standard Tags</h2>
+
+<ul>
+<li><p>NOOP <br/>
+  Does exactly nothing. This tag does not process any of its attributes or any of its child-tags. Can be useful to stop transformation of nodes further in.</p></li>
+<li><p>LET <br/>
+  Creates a new clipboard environment with all the tag attributes bound in the following manner: The attribute key is put into the clipboard as if by READ and associated with the value of <code><a href="#CLIP:RESOLVE-VALUE">RESOLVE-VALUE</a></code> of the attribute value.</p></li>
+<li><p>ITERATE <br/>
+  Looks for one attribute called 'OVER' and then works like the ITERATE attribute processor using the value of the OVER attribute.</p></li>
+<li><p>EXPAND <br/>
+  This tag expands its attributes and then calls <code><a href="#CLIP:PROCESS-NODE">PROCESS-NODE</a></code> on itself again. This is useful to generate attributes to be expanded.</p></li>
+<li><p>SPLICE <br/>
+  Splices all nodes within it into the parent's child list at the position of itself (essentially replacing it with its children).</p></li>
+<li><p>WHEN <br/>
+  Looks for a 'TEST' attribute and if the value of it as by <code><a href="#CLIP:RESOLVE-VALUE">RESOLVE-VALUE</a></code> is non-NIL, acts like SPLICE. Otherwise it removes itself including its children from the DOM.</p></li>
+<li><p>UNLESS <br/>
+  Same as WHEN, but inverted.</p></li>
+<li><p>IF <br/>
+  Looks for either a 'TEST' attribute or a 'TEST' tag as one of its direct children. If the test as by <code><a href="#CLIP:RESOLVE-VALUE">RESOLVE-VALUE</a></code> is non-NIL, all children of the 'THEN' tag are spliced in place of the IF block. Otherwise the same is done for the 'ELSE' block. If neither 'THEN' or 'ELSE' blocks are found as direct children of the 'IF', the 'IF' is simply removed from the DOM.</p></li>
+</ul>
+
+<h2>Standard Attributes</h2>
+
+<ul>
+<li><p>LQUERY <br/>
+  Calls lQuery functions on the node as if by <code>($ node ..)</code>. Note that only lQuery functions are available, not its macros.</p></li>
+<li><p>EVAL <br/>
+  Simply calls <code><a href="http://l1sp.org/cl/EVAL">EVAL</a></code> on the value of <code><a href="http://l1sp.org/cl/READ-FROM-STRING">READ-FROM-STRING</a></code> of the attribute value.</p></li>
+<li><p>ITERATE <br/>
+  The value (as by <code><a href="#CLIP:RESOLVE-VALUE">RESOLVE-VALUE</a></code>) is used as an iteration list or vector. The first node within the node this attribute belongs to is copied once for each item in the iteration list and processed with that item used as the clipboard.</p></li>
+<li><p>AS <br/>
+  Simply changes that node's tag-name to the value of this attribute.</p></li>
+<li><p>COUNT <br/>
+  Inserts the value of <code><a href="#CLIP:*TARGET-COUNT*">*TARGET-COUNT*</a></code> as the attribute value. This is useful to follow processing order in debugging.</p></li>
+</ul>
+
+<h2>Extending Clip</h2>
+
+<p>You can define new tag and attribute processors with the macros <code><a href="#CLIP:DEFINE-TAG-PROCESSOR">DEFINE-TAG-PROCESSOR</a></code> and <code><a href="#CLIP:DEFINE-ATTRIBUTE-PROCESSOR">DEFINE-ATTRIBUTE-PROCESSOR</a></code>. For tag processors you will usually want to make sure to call <code><a href="#CLIP:PROCESS-ATTRIBUTES">PROCESS-ATTRIBUTES</a></code> and <code><a href="#CLIP:PROCESS-CHILDREN">PROCESS-CHILDREN</a></code> to ensure that tags and attributes within are properly processed. To retrieve values most of the time you need to use <code><a href="#CLIP:RESOLVE-VALUE">RESOLVE-VALUE</a></code> (or its shorthand <code><a href="#CLIP:RESOLVE-ATTRIBUTE">RESOLVE-ATTRIBUTE</a></code>) unless you want to whip up your own system for one reason or another.</p>
+
+<h2>Further Reading</h2>
+
+<ul>
+<li><a href="https://shinmera.github.io/plump">Plump</a></li>
+<li><a href="https://shinmera.github.io/lquery">lQuery</a></li>
+</ul>
+</span>
+        </documentate>
+      </article>
+      <article>
+        <h2>Copyright</h2>
+        <span>clip</span> is licensed under the <span><a href="https://tldrlegal.com/search?q=Artistic">Artistic</a></span> license and ©<span>2014</span> <span>Nicolas Hafner &lt;shinmera@tymoon.eu&gt;</span>. This library can be obtained on <a href="https://github.com/Shinmera/clip">https://github.com/Shinmera/clip</a>.
+      </article>
+      <article>
+        <h2>Package Index</h2>
+        <ul><li class="package">
+            <h3>
+              <a name="CLIP" href="#CLIP">CLIP</a>
+              <span class="nicknames">(ORG.TYMOONNEXT.CLIP)</span>
+            </h3>
+            <ul><li>
+                <a name="CLIP:ATTRIBUTE-PROCESSOR"/>
+                <article>
+                  <header>
+                    <span>FUNCTION</span>
+                    <code>
+                      <h4><a href="#CLIP:ATTRIBUTE-PROCESSOR">ATTRIBUTE-PROCESSOR</a></h4>
+                      <span></span>
+                      <span>(ATTRIBUTE)</span>
+                    </code>
+                  </header>
+                  <pre>Returns the processor function for the requested attribute if one is registered.
+Otherwise returns NIL. See *ATTRIBUTE-PROCESSORS*.</pre>
+                </article>
+              </li><li>
+                <a name="CLIP:CLIPBOARD"/>
+                <article>
+                  <header>
+                    <span>FUNCTION</span>
+                    <code>
+                      <h4><a href="#CLIP:CLIPBOARD">CLIPBOARD</a></h4>
+                      <span></span>
+                      <span>(FIELD)</span>
+                    </code>
+                  </header>
+                  <pre>Shorthand for (CLIP *CLIPBOARD* FIELD)</pre>
+                </article>
+              </li><li>
+                <a name="CLIP:MAKE-CLIPBOARD"/>
+                <article>
+                  <header>
+                    <span>FUNCTION</span>
+                    <code>
+                      <h4><a href="#CLIP:MAKE-CLIPBOARD">MAKE-CLIPBOARD</a></h4>
+                      <span></span>
+                      <span>(&amp;REST FIELDS)</span>
+                    </code>
+                  </header>
+                  <pre>Creates a new clipboard using the specified fields (like a plist).</pre>
+                </article>
+              </li><li>
+                <a name="CLIP:PROCESS"/>
+                <article>
+                  <header>
+                    <span>FUNCTION</span>
+                    <code>
+                      <h4><a href="#CLIP:PROCESS">PROCESS</a></h4>
+                      <span></span>
+                      <span>(TARGET &amp;REST FIELDS)</span>
+                    </code>
+                  </header>
+                  <pre>Processes all clip markup on the target with the given FIELDS used to initialise the clipboard.</pre>
+                </article>
+              </li><li>
+                <a name="CLIP:PROCESS-ATTRIBUTE"/>
+                <article>
+                  <header>
+                    <span>FUNCTION</span>
+                    <code>
+                      <h4><a href="#CLIP:PROCESS-ATTRIBUTE">PROCESS-ATTRIBUTE</a></h4>
+                      <span></span>
+                      <span>(ATTRIBUTE VALUE)</span>
+                    </code>
+                  </header>
+                  <pre>Processes the specified attribute using the given value.
+If no attribute processor can be found, nothing is done.
+See *TARGET*, *ATTRIBUTE-PROCESSORS*.</pre>
+                </article>
+              </li><li>
+                <a name="CLIP:PROCESS-ATTRIBUTES"/>
+                <article>
+                  <header>
+                    <span>FUNCTION</span>
+                    <code>
+                      <h4><a href="#CLIP:PROCESS-ATTRIBUTES">PROCESS-ATTRIBUTES</a></h4>
+                      <span></span>
+                      <span>(NODE)</span>
+                    </code>
+                  </header>
+                  <pre>Processes all attributes on the node.
+See PROCESS-ATTRIBUTE.</pre>
+                </article>
+              </li><li>
+                <a name="CLIP:PROCESS-CHILDREN"/>
+                <article>
+                  <header>
+                    <span>FUNCTION</span>
+                    <code>
+                      <h4><a href="#CLIP:PROCESS-CHILDREN">PROCESS-CHILDREN</a></h4>
+                      <span></span>
+                      <span>(NODE)</span>
+                    </code>
+                  </header>
+                  <pre>Calls PROCESS-NODE on all childrens of the passed node.
+
+This takes some care to make sure that splicing into the childrens array
+of the node is possible. However, note that inserting children before the
+node that is currently being processed will most likely lead to horrors.
+If such functionality is indeed ever needed (I hope not), this system
+needs to be rewritten to somehow be able to cope with such scenarios. </pre>
+                </article>
+              </li><li>
+                <a name="CLIP:PROCESS-NODE"/>
+                <article>
+                  <header>
+                    <span>FUNCTION</span>
+                    <code>
+                      <h4><a href="#CLIP:PROCESS-NODE">PROCESS-NODE</a></h4>
+                      <span></span>
+                      <span>(NODE)</span>
+                    </code>
+                  </header>
+                  <pre>Processes the passed node.
+
+Depending on type the following is done:
+PLUMP:ELEMENT       PROCESS-TAG is called.
+PLUMP:NESTING-NODE  PROCESS-CHILDREN is called.
+PLUMP:NODE          Nothing is done.
+T                   An error is signalled.
+Any call to this also increases the *TARGET-COUNTER* regardless of what
+is done.</pre>
+                </article>
+              </li><li>
+                <a name="CLIP:PROCESS-TAG"/>
+                <article>
+                  <header>
+                    <span>FUNCTION</span>
+                    <code>
+                      <h4><a href="#CLIP:PROCESS-TAG">PROCESS-TAG</a></h4>
+                      <span></span>
+                      <span>(TAG NODE)</span>
+                    </code>
+                  </header>
+                  <pre>Processes the specified node as the given tag.
+If no tag processor can be found, PROCESS-ATTRIBUTES and PROCESS-CHILDREN is called.
+See *TAG-PROCESSORS*.</pre>
+                </article>
+              </li><li>
+                <a name="CLIP:RESOLVE-ATTRIBUTE"/>
+                <article>
+                  <header>
+                    <span>FUNCTION</span>
+                    <code>
+                      <h4><a href="#CLIP:RESOLVE-ATTRIBUTE">RESOLVE-ATTRIBUTE</a></h4>
+                      <span></span>
+                      <span>(NODE ATTR)</span>
+                    </code>
+                  </header>
+                  <pre>Shorthand to resolve the value of an attibute.
+See RESOLVE-VALUE.</pre>
+                </article>
+              </li><li>
+                <a name="CLIP:TAG-PROCESSOR"/>
+                <article>
+                  <header>
+                    <span>FUNCTION</span>
+                    <code>
+                      <h4><a href="#CLIP:TAG-PROCESSOR">TAG-PROCESSOR</a></h4>
+                      <span></span>
+                      <span>(TAG)</span>
+                    </code>
+                  </header>
+                  <pre>Returns the processor function for the requested tag if one is registered.
+Otherwise returns NIL. See *TAG-PROCESSORS*.</pre>
+                </article>
+              </li><li>
+                <a name="CLIP:CLIP"/>
+                <article>
+                  <header>
+                    <span>GENERIC</span>
+                    <code>
+                      <h4><a href="#CLIP:CLIP">CLIP</a></h4>
+                      <span></span>
+                      <span>(OBJECT FIELD)</span>
+                    </code>
+                  </header>
+                  <pre>Generic object accessor.
+If you want to get special treatment of objects or types, define your own methods on this.</pre>
+                </article>
+              </li><li>
+                <a name="CLIP:RESOLVE-VALUE"/>
+                <article>
+                  <header>
+                    <span>GENERIC</span>
+                    <code>
+                      <h4><a href="#CLIP:RESOLVE-VALUE">RESOLVE-VALUE</a></h4>
+                      <span></span>
+                      <span>(OBJECT)</span>
+                    </code>
+                  </header>
+                  <pre>Attempts to resolve the object to a specific value.
+This is usually used in combination with READ-FROM-STRING of an attribute value.</pre>
+                </article>
+              </li><li>
+                <a name="CLIP:DEFINE-ATTRIBUTE-PROCESSOR"/>
+                <article>
+                  <header>
+                    <span>MACRO</span>
+                    <code>
+                      <h4><a href="#CLIP:DEFINE-ATTRIBUTE-PROCESSOR">DEFINE-ATTRIBUTE-PROCESSOR</a></h4>
+                      <span></span>
+                      <span>(ATTRIBUTE (NODE VALUE) &amp;BODY BODY)</span>
+                    </code>
+                  </header>
+                  <pre>Defines a new attribute processor.
+
+ATTRIBTUE --- A symbol or string that matches the attribute to process (case-insensitive)
+NODE      --- The current node is bound to this symbol.
+VALUE     --- The value of the attribute is bound to this symbol.
+BODY      ::= form*</pre>
+                </article>
+              </li><li>
+                <a name="CLIP:DEFINE-TAG-PROCESSOR"/>
+                <article>
+                  <header>
+                    <span>MACRO</span>
+                    <code>
+                      <h4><a href="#CLIP:DEFINE-TAG-PROCESSOR">DEFINE-TAG-PROCESSOR</a></h4>
+                      <span></span>
+                      <span>(TAG (NODE) &amp;BODY BODY)</span>
+                    </code>
+                  </header>
+                  <pre>Defines a new attribute processor.
+
+TAG    --- A symbol or string that matches the tag name to process (case-insensitive)
+NODE   --- The node to process is bound to this symbol
+BODY   ::= form*</pre>
+                </article>
+              </li><li>
+                <a name="CLIP:*ATTRIBUTE-PROCESSORS*"/>
+                <article>
+                  <header>
+                    <span>SPECIAL</span>
+                    <code>
+                      <h4><a href="#CLIP:*ATTRIBUTE-PROCESSORS*">*ATTRIBUTE-PROCESSORS*</a></h4>
+                      <span></span>
+                      <span></span>
+                    </code>
+                  </header>
+                  <pre>Global registry of attribute processors.
+
+This has to be an EQUALP hash-table with the attribute name as keys
+and functions that accept two arguments (node attribute-value) as
+values. Binding this variable can be useful to establish local
+attributes.</pre>
+                </article>
+              </li><li>
+                <a name="CLIP:*CLIPBOARD*"/>
+                <article>
+                  <header>
+                    <span>SPECIAL</span>
+                    <code>
+                      <h4><a href="#CLIP:*CLIPBOARD*">*CLIPBOARD*</a></h4>
+                      <span></span>
+                      <span></span>
+                    </code>
+                  </header>
+                  <pre>Template storage object.</pre>
+                </article>
+              </li><li>
+                <a name="CLIP:*TAG-PROCESSORS*"/>
+                <article>
+                  <header>
+                    <span>SPECIAL</span>
+                    <code>
+                      <h4><a href="#CLIP:*TAG-PROCESSORS*">*TAG-PROCESSORS*</a></h4>
+                      <span></span>
+                      <span></span>
+                    </code>
+                  </header>
+                  <pre>Global registry of tag processors.
+
+This has to be an EQUALP hash-table with the tag name as keys
+and functions that accept one argument (the node) as
+values. Binding this variable can be useful to establish local
+tags.</pre>
+                </article>
+              </li><li>
+                <a name="CLIP:*TARGET*"/>
+                <article>
+                  <header>
+                    <span>SPECIAL</span>
+                    <code>
+                      <h4><a href="#CLIP:*TARGET*">*TARGET*</a></h4>
+                      <span></span>
+                      <span></span>
+                    </code>
+                  </header>
+                  <pre>This variable is bound to whatever node is currently being processed.</pre>
+                </article>
+              </li></ul></li></ul></article></div></body></html>
