@@ -10,6 +10,10 @@
   (:use #:cl #:lquery)
   ;; attr-processors.lisp
   (:export
+   #:*attribute-processors*
+   #:*target*
+   #:*target-count*
+   #:attribute-processor
    #:process-attribute
    #:define-attribute-processor
    #:process-attributes)
@@ -23,10 +27,11 @@
    #:resolve-attribute)
   ;; processor.lisp
   (:export
-   #:*target*
    #:process)
   ;; tag-processors.lisp
   (:export
+   #:*tag-processors*
+   #:tag-processor
    #:process-tag
    #:define-tag-processor
    #:process-children
