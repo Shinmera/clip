@@ -66,5 +66,14 @@
       *clipboard*
       (clipboard symbol)))
 
+(defmethod resolve-value ((list list))
+  (let ((func (car list))
+        (args (cdr list)))
+    (case func
+      (quote (first args))
+      (function (symbol-function (first args)))
+      (T (apply (or (find-symbol (string func) :clip) func)
+                (mapcar #'resolve-value args))))))
+
 (defun resolve-attribute (node attr)
   (resolve-value (read-from-string (plump:attribute node attr))))
