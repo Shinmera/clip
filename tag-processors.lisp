@@ -6,18 +6,23 @@
 
 (in-package #:org.tymoonnext.clip)
 
-(defgeneric process-tag (tag node))
+(defvar *tag-processors* (make-hash-table :test 'equalp))
 
-(defmethod process-tag (tag node)
-  ;; NOOP
-  )
+(defun tag-processor (tag)
+  (gethash tag *tag-processors*))
+(defun (setf tag-processor) (func tag)
+  (setf (gethash tag *tag-processors*) func))
 
-(defmacro define-tag-processor (tag &rest args)
-  (flet ((make-body ()
-           `(((,(gensym "TAG") (eql ,(make-keyword tag))) ,@(first args)) ,@(rest args))))
-    `(defmethod process-tag ,@(if (listp (first args))
-                                  (make-body)
-                                  (cons (pop args) (make-body))))))
+(defun process-tag (tag node)
+  (let ((func (tag-processor tag)))
+    (cond
+      (func (funcall func node))
+      (T (process-attributes node)
+         (process-children node)))))
+
+(defmacro define-tag-processor (tag (node) &body body)
+  `(setf (tag-processor ,(string tag))
+         #'(lambda (,node) ,@body)))
 
 (defun process-children (node)
   (loop for i from 0 ;; We do this manually to allow growing size of the array.
@@ -26,32 +31,30 @@
         do (process-node child))
   node)
 
-(defmethod process-tag (tag (node plump:element))
-  (process-attributes node)
-  (process-children node)
-  node)
-
 (defun process-node (node)
   (incf *target-counter*)
   (let ((*target* node))
     (etypecase node
-      (plump:element (process-tag (make-keyword (string-upcase (plump:tag-name node))) node))
+      (plump:element (process-tag (plump:tag-name node) node))
       (plump:nesting-node (process-children node))
       (plump:node))
     node))
 
-(define-tag-processor noop (node))
+(define-tag-processor noop (node)
+  (declare (ignore node)))
 
 (define-tag-processor let (node)
-  (maphash #'(lambda (key val)
-               (setf (clipboard key) (resolve-value (read-from-string val))))
-           (plump:attributes node))
-  (process-children node))
+  (let ((*clipboard* (make-hash-table)))
+    (maphash #'(lambda (key val)
+                 (setf (clipboard (read-from-string key))
+                       (resolve-value (read-from-string val))))
+             (plump:attributes node))
+    (process-children node)))
 
 (define-tag-processor iterate (node)
   (let ((var (plump:attribute node "over")))
     (plump:remove-attribute node var)
-    (process-attribute :iterate var)
+    (process-attribute "iterate" var)
     (process-attributes node)))
 
 (define-tag-processor expand (node)
@@ -89,7 +92,7 @@
   (process-attributes node)
   (let ((test (resolve-value (read-from-string (plump:attribute node "test")))))
     (if test
-        (process-tag :splice node)
+        (process-tag "splice" node)
         (plump:remove-child node))))
 
 (define-tag-processor unless (node)
@@ -97,7 +100,7 @@
   (let ((test (resolve-value (read-from-string (plump:attribute node "test")))))
     (if test
         (plump:remove-child node)
-        (process-tag :splice node))))
+        (process-tag "splice" node))))
 
 (define-tag-processor if (node)
   (process-attributes node)

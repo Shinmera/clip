@@ -6,24 +6,25 @@
 
 (in-package #:org.tymoonnext.clip)
 
+(defvar *attribute-processors* (make-hash-table :test 'equalp))
 (defvar *target*)
 (defvar *target-counter* 0)
 
-(defgeneric process-attribute (attribute value))
+(defun attribute-processor (attribute)
+  (gethash attribute *attribute-processors*))
+(defun (setf attribute-processor) (func attribute)
+  (setf (gethash attribute *attribute-processors*) func))
 
-(defmethod process-attribute (attribute value)
-  ;; NOOP
-  )
+(defun process-attribute (attribute value)
+  (let ((func (attribute-processor attribute)))
+    (when func (funcall func *target* value))))
 
 (defmacro define-attribute-processor (attribute (node value) &body body)
-  `(defmethod process-attribute ((,(gensym "ATTR") (eql ,(make-keyword attribute))) ,value)
-     (let ((,node *target*))
-       ,@body)))
+  `(setf (attribute-processor ,(string attribute))
+         #'(lambda (,node ,value) ,@body)))
 
 (defun process-attributes (node)
-  (maphash #'(lambda (key val)
-               (process-attribute (make-keyword (string-upcase key)) val))
-           (plump:attributes node)))
+  (maphash #'process-attribute (plump:attributes node)))
 
 (defun %resolve-lquery-arg (arg)
   (typecase arg
@@ -76,4 +77,5 @@
   (plump:remove-attribute node "as"))
 
 (define-attribute-processor count (node value)
+  (declare (ignore value))
   (setf (plump:attribute node "count") (princ-to-string *target-counter*)))
