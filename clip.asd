@@ -10,11 +10,12 @@
 
 (defsystem clip
   :name "Clip HTML Processor"
-  :version "0.0.1"
+  :version "0.2.1"
   :license "Artistic"
   :author "Nicolas Hafner <shinmera@tymoon.eu>"
   :maintainer "Nicolas Hafner <shinmera@tymoon.eu>"
   :description "An HTML templating engine using Plump."
+  :homepage "https://github.com/Shinmera/clip"
   :serial T
   :components ((:file "package")
                (:file "toolkit")
