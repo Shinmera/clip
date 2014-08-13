@@ -164,3 +164,9 @@ is done."
          (when then (plump:remove-child then))
          (splice (plump:children else)))
         (T (plump:remove-child node))))))
+
+(define-tag-processor using (node)
+  (process-attributes node)
+  (let ((*clipboard* (resolve-attribute node "field")))
+    (process-children node)
+    (process-tag "splice" node)))
