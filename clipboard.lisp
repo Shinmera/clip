@@ -112,8 +112,8 @@ all individually passed to RESOLVE-VALUE too)."
                  when (not val)
                    do (return)
                  finally (return val)))
-      (T (apply (or (let ((s (find-symbol (string func) :clip)))
-                      (when (and s (fboundp s)) s)) func)
+      (T (apply (or (multiple-value-bind (s e) (find-symbol (string func) :clip)
+                      (when (and s (eql e :external) (fboundp s)) s)) func)
                 (mapcar #'resolve-value args))))))
 
 (defun resolve-attribute (node attr)
