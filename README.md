@@ -44,6 +44,9 @@ Standard Tags
 * IF <br />
   Looks for either a 'TEST' attribute or a 'TEST' tag as one of its direct children. If the test as by `RESOLVE-VALUE` is non-NIL, all children of the 'THEN' tag are spliced in place of the IF block. Otherwise the same is done for the 'ELSE' block. If neither 'THEN' or 'ELSE' blocks are found as direct children of the 'IF', the 'IF' is simply removed from the DOM.
 
+* USING <br />
+  Binds the clipboard to the resolved-value of its 'FIELD' attribute. This binding is only active for blocks within the 'USING' block.
+
 Standard Attributes
 -------------------
 * LQUERY <br />
