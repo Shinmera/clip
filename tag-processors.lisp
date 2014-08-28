@@ -40,8 +40,9 @@ See *TAG-PROCESSORS*."
 TAG    --- A symbol or string that matches the tag name to process (case-insensitive)
 NODE   --- The node to process is bound to this symbol
 BODY   ::= form*"
-  `(setf (tag-processor ,(string tag))
-         #'(lambda (,node) ,@body)))
+  `(setf (tag-processor ,(format NIL "C:~a" tag))
+    (setf (tag-processor ,(string tag))
+          #'(lambda (,node) ,@body))))
 
 (defun process-children (node)
   "Calls PROCESS-NODE on all childrens of the passed node.
