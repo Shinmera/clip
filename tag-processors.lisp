@@ -83,7 +83,7 @@ is done."
   (let ((new-clipboard (make-hash-table)))
     (maphash #'(lambda (key val)
                  (setf (clip new-clipboard (read-from-string key))
-                       (resolve-value (read-from-string val))))
+                       (parse-and-resolve val)))
              (plump:attributes node))
     (let ((*clipboard* new-clipboard))
       (process-children node))))
@@ -124,14 +124,14 @@ is done."
 
 (define-tag-processor when (node)
   (process-attributes node)
-  (let ((test (resolve-value (read-from-string (plump:attribute node "test")))))
+  (let ((test (resolve-attribute node "test")))
     (if test
         (process-tag "splice" node)
         (plump:remove-child node))))
 
 (define-tag-processor unless (node)
   (process-attributes node)
-  (let ((test (resolve-value (read-from-string (plump:attribute node "test")))))
+  (let ((test (resolve-attribute node "test")))
     (if test
         (plump:remove-child node)
         (process-tag "splice" node))))

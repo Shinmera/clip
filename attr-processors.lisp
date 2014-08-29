@@ -52,27 +52,22 @@ BODY      ::= form*"
 See PROCESS-ATTRIBUTE."
   (maphash #'process-attribute (plump:attributes node)))
 
-(defun %resolve-lquery-arg (arg)
-  (typecase arg
-    (keyword arg)
-    (T (resolve-value arg))))
-
 (define-attribute-processor lquery (node value)
   (let ((actions (typecase value
-                   (list (list value))
+                   (list value)
                    (string (read-from-string (format NIL "(~a)" value))))))
     (plump:remove-attribute node "lquery")
     (loop with node = (make-proper-vector :size 1 :initial-element node :fill-pointer T)
           for (func . args) in actions
           do (apply (or (find-symbol (string func) :lquery-funcs) func)
-                    node (mapcar #'%resolve-lquery-arg args)))))
+                    node (mapcar #'resolve-value args)))))
 
 (define-attribute-processor eval (node value)
   (eval (read-from-string value))
   (plump:remove-attribute node "eval"))
 
 (define-attribute-processor iterate (node value)
-  (let ((val (resolve-value (read-from-string value)))
+  (let ((val (parse-and-resolve value))
         (new-children (plump:make-child-array))
         (target (plump:first-element node)))
     (flet ((process (item)
