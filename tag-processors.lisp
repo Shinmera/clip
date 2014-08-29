@@ -144,11 +144,14 @@ is done."
     ;; Gather elements
     (loop for child across (plump:children node)
           when (plump:element-p child)
-            do (when (and (not test) (string-equal (plump:tag-name child) "test"))
+            do (when (and (not test) (or (string-equal (plump:tag-name child) "test")
+                                         (string-equal (plump:tag-name child) "c:test")))
                  (setf test (plump:text child)))
-               (when (and (not then) (string-equal (plump:tag-name child) "then"))
+               (when (and (not then) (or (string-equal (plump:tag-name child) "then")
+                                         (string-equal (plump:tag-name child) "c:then")))
                  (setf then child))
-               (when (and (not else) (string-equal (plump:tag-name child) "else"))
+               (when (and (not else) (or (string-equal (plump:tag-name child) "else")
+                                         (string-equal (plump:tag-name child) "c:else")))
                  (setf else child)))
     ;; Parse test
     (when (stringp test)
