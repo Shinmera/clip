@@ -80,10 +80,13 @@ This is usually used in combination with READ-FROM-STRING of an attribute value.
 (defmethod resolve-value ((symbol symbol))
   "Handler for symbols.
 If the symbol is EQL to '* the *CLIPBOARD* is returned,
+If the symbol is a keyword the symbol itself is returned,
 otherwise the value of (CLIPBOARD SYMBOL) is returned."
-  (if (eql symbol '*)
-      *clipboard*
-      (clipboard symbol)))
+  (cond ((eql symbol '*)
+         *clipboard*)
+        ((keywordp symbol)
+         symbol)
+        (T (clipboard symbol))))
 
 (defmethod resolve-value ((list list))
   "Handler for lists, aka function calls.
@@ -120,3 +123,10 @@ all individually passed to RESOLVE-VALUE too)."
   "Shorthand to resolve the value of an attibute.
 See RESOLVE-VALUE."
   (resolve-value (read-from-string (plump:attribute node attr))))
+
+(defun parse-and-resolve (value)
+  "If the passed value is a STRING it is parsed using READ-FROM-STRING and subsequently passed to RESOLVE-VALUE.
+If it is not a string, the value itself is returned."
+  (if (stringp value)
+      (resolve-value (read-from-string value))
+      value))
