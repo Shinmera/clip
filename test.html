@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8"/>
+    <title>CLIP Test Page</title>
+    <c:css>
+      this, tag{
+          could: do some "minification";
+          i: suppose;
+      }
+      but, again{
+          since: "it is a user-defined tag";
+          there: is no knowing;
+          what: exactly;
+          it: will do;
+      }
+    </c:css>
+    <c:meta-tags />
+  </head>
+  <body>
+    <article id="thread-op" class="post">
+      <a name="0" />
+      <using field=":thread">
+        <header>
+          <h1>Thread #<splice lquery="(text id)">ID</splice></h1>
+          <div class="author">
+            <c:profile user="author" />
+          </div>
+          <ul iterate="tags">
+            <li count="">
+              <if>
+                <test>
+                  (series-p *)
+                </test>
+                <then>
+                  <a class="tag series" lquery="(text *)">TAG</a>
+                </then>
+                <else>
+                  <a class="tag" lquery="(text *)">TAG</a>
+                </else>
+              </if>
+            </li>
+            this text will be discarded
+          </ul>
+        </header>
+        <section class="content">
+          <noop as="blockquote">
+            This is some user generated content or something that contains <c:lip>tags</c:lip> and other things that would otherwise be parsed.
+            Thanks to the <b lquery="(text foo)">noop</b> tag though, no transformations will take place.
+          </noop>
+        </section>
+        <footer>
+          <nav id="postedit">
+            <when test="(editable-p *)">
+              <li><a href="#" lquery="(attr :href (format NIL &quot;/edit/~a&quot; id))">Edit</a></li>
+            </when>
+            <li><a href="#0">Permalink</a></li>
+          </nav>
+        </footer>
+      </using>
+    </article>
+    <section id="replies">
+      <let posts="(thread-posts :thread)" thread=":thread">
+        <iterate over="posts" as="ul">
+          <li eval="(increase-post-count)">
+            <article class="post">
+              <a name="n" lquery="(attr :name (post-count))" />
+              <header>
+                <unless test="(anonymous-p author)">
+                  <div class="author">
+                    <c:profile user="author" />
+                  </div>
+                </unless>
+              </header>
+              <section class="content">
+                <noop as="blockquote">
+                  This is some user generated content or something that contains <c:lip>tags</c:lip> and other things that would otherwise be parsed.
+                  Thanks to the <b lquery="(text foo)">noop</b> tag though, no transformations will take place.
+                </noop>
+              </section>
+              <footer>
+                <nav id="postedit">
+                  <when test="(editable-p *)">
+                    <li><a href="#" lquery="(attr :href (format NIL &quot;/edit/~a&quot; id))">Edit</a></li>
+                  </when>
+                  <li><a href="#" lquery="(attr :href (format NIL &quot;#~a&quot; (post-count)))">Permalink</a></li>
+                </nav>
+              </footer>
+            </article>
+          </li>
+        </iterate>
+      </let>
+    </section>
+    <expand as="footer" lquery="(attr :lquery (compute-footer-actions :thread))">
+      FOOTER
+    </expand>
+    <c:js>
+      $(function(){
+          console.log("I guess this tag could do some special JS analysis and insert missing libs or something, idk.");
+      });
+    </c:js>
+  </body>
+</html>
