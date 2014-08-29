@@ -10,7 +10,7 @@
 
 (defsystem clip
   :name "Clip HTML Processor"
-  :version "0.2.1"
+  :version "0.3.1"
   :license "Artistic"
   :author "Nicolas Hafner <shinmera@tymoon.eu>"
   :maintainer "Nicolas Hafner <shinmera@tymoon.eu>"
