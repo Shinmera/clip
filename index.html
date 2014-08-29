@@ -87,6 +87,10 @@
 
 <p>You can define new tag and attribute processors with the macros <code><a href="#CLIP:DEFINE-TAG-PROCESSOR">DEFINE-TAG-PROCESSOR</a></code> and <code><a href="#CLIP:DEFINE-ATTRIBUTE-PROCESSOR">DEFINE-ATTRIBUTE-PROCESSOR</a></code>. For tag processors you will usually want to make sure to call <code><a href="#CLIP:PROCESS-ATTRIBUTES">PROCESS-ATTRIBUTES</a></code> and <code><a href="#CLIP:PROCESS-CHILDREN">PROCESS-CHILDREN</a></code> to ensure that tags and attributes within are properly processed. To retrieve values most of the time you need to use <code><a href="#CLIP:RESOLVE-VALUE">RESOLVE-VALUE</a></code> (or its shorthand <code><a href="#CLIP:RESOLVE-ATTRIBUTE">RESOLVE-ATTRIBUTE</a></code>) unless you want to whip up your own system for one reason or another. All tags that you define will automatically be prefixed with 'C:' in order to help highlighting template tags and ensure that there are no collisions with existing tags.</p>
 
+<h2>Editor Support</h2>
+
+<p>The Emacs extension <a href="http://web-mode.org/">Web-Mode</a>(version 9.0.77+) provides syntax highlighting for Clip templates. In order for it to recognise the templates, use the <code>.ctml</code> file extension. A huge thanks goes to <a href="https://github.com/fxbois">Bois Francois-Xavier</a> for adding the support.</p>
+
 <h2>Further Reading</h2>
 
 <ul>
