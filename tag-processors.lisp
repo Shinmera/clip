@@ -77,15 +77,16 @@ is done."
     node))
 
 (define-tag-processor noop (node)
-  (declare (ignore node)))
+  (process-attributes node))
 
 (define-tag-processor let (node)
-  (let ((*clipboard* (make-hash-table)))
+  (let ((new-clipboard (make-hash-table)))
     (maphash #'(lambda (key val)
-                 (setf (clipboard (read-from-string key))
+                 (setf (clip new-clipboard (read-from-string key))
                        (resolve-value (read-from-string val))))
              (plump:attributes node))
-    (process-children node)))
+    (let ((*clipboard* new-clipboard))
+      (process-children node))))
 
 (define-tag-processor iterate (node)
   (process-attributes node)
