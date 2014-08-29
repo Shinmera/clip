@@ -18,8 +18,8 @@
   </head>
   <body>
     <header>
-      <h1><img src="clip-logo.png" alt="clip"/></h1>
-      <span>0.2.1</span>
+      <h1>clip</h1>
+      <span>0.3.1</span>
       <p>An HTML templating engine using Plump.</p>
     </header>
     <div id="content">
@@ -37,7 +37,7 @@
 
 <p>To process a template, simply call <code><a href="#CLIP:PROCESS">process</a></code>:</p>
 
-<p><code>(<a href="#CLIP:PROCESS">clip:process</a> #p&quot;my-template.html&quot;)</code></p>
+<p><code>(<a href="#CLIP:PROCESS">clip:process</a> #p&quot;my-template.ctml&quot;)</code></p>
 
 <p>You may also pass in pure strings or plump nodes. Most likely you will want to include some kind of data in your template. Data in Clip is managed through a central <code><a href="#CLIP:*CLIPBOARD*">*CLIPBOARD*</a></code>. The additional arguments you pass to <code><a href="#CLIP:PROCESS">PROCESS</a></code> are entered into the initial clipboard like a plist (key and value alternating).</p>
 
@@ -48,22 +48,24 @@
 <h2>Standard Tags</h2>
 
 <ul>
-<li><p>NOOP <br/>
-  Does exactly nothing. This tag does not process any of its attributes or any of its child-tags. Can be useful to stop transformation of nodes further in.</p></li>
-<li><p>LET <br/>
+<li><p>C:NOOP <br/>
+  This tag only processes its attributes, but none of its children.</p></li>
+<li><p>C:LET <br/>
   Creates a new clipboard environment with all the tag attributes bound in the following manner: The attribute key is put into the clipboard as if by READ and associated with the value of <code><a href="#CLIP:RESOLVE-VALUE">RESOLVE-VALUE</a></code> of the attribute value.</p></li>
-<li><p>ITERATE <br/>
+<li><p>C:ITERATE <br/>
   Looks for one attribute called 'OVER' and then works like the ITERATE attribute processor using the value of the OVER attribute.</p></li>
-<li><p>EXPAND <br/>
+<li><p>C:EXPAND <br/>
   This tag expands its attributes and then calls <code><a href="#CLIP:PROCESS-NODE">PROCESS-NODE</a></code> on itself again. This is useful to generate attributes to be expanded.</p></li>
-<li><p>SPLICE <br/>
+<li><p>C:SPLICE <br/>
   Splices all nodes within it into the parent's child list at the position of itself (essentially replacing it with its children).</p></li>
-<li><p>WHEN <br/>
+<li><p>C:WHEN <br/>
   Looks for a 'TEST' attribute and if the value of it as by <code><a href="#CLIP:RESOLVE-VALUE">RESOLVE-VALUE</a></code> is non-NIL, acts like SPLICE. Otherwise it removes itself including its children from the DOM.</p></li>
-<li><p>UNLESS <br/>
+<li><p>C:UNLESS <br/>
   Same as WHEN, but inverted.</p></li>
-<li><p>IF <br/>
-  Looks for either a 'TEST' attribute or a 'TEST' tag as one of its direct children. If the test as by <code><a href="#CLIP:RESOLVE-VALUE">RESOLVE-VALUE</a></code> is non-NIL, all children of the 'THEN' tag are spliced in place of the IF block. Otherwise the same is done for the 'ELSE' block. If neither 'THEN' or 'ELSE' blocks are found as direct children of the 'IF', the 'IF' is simply removed from the DOM.</p></li>
+<li><p>C:IF <br/>
+  Looks for either a 'TEST' attribute or a 'C:TEST' tag as one of its direct children. If the test as by <code><a href="#CLIP:RESOLVE-VALUE">RESOLVE-VALUE</a></code> is non-NIL, all children of the 'C:THEN' tag are spliced in place of the IF block. Otherwise the same is done for the 'C:ELSE' block. If neither 'C:THEN' or 'C:ELSE' blocks are found as direct children of the 'C:IF', the 'C:IF' is simply removed from the DOM.</p></li>
+<li><p>C:USING <br/>
+  Binds the clipboard to the resolved-value of its 'FIELD' attribute. This binding is only active for blocks within the 'USING' block.</p></li>
 </ul>
 
 <h2>Standard Attributes</h2>
@@ -83,7 +85,7 @@
 
 <h2>Extending Clip</h2>
 
-<p>You can define new tag and attribute processors with the macros <code><a href="#CLIP:DEFINE-TAG-PROCESSOR">DEFINE-TAG-PROCESSOR</a></code> and <code><a href="#CLIP:DEFINE-ATTRIBUTE-PROCESSOR">DEFINE-ATTRIBUTE-PROCESSOR</a></code>. For tag processors you will usually want to make sure to call <code><a href="#CLIP:PROCESS-ATTRIBUTES">PROCESS-ATTRIBUTES</a></code> and <code><a href="#CLIP:PROCESS-CHILDREN">PROCESS-CHILDREN</a></code> to ensure that tags and attributes within are properly processed. To retrieve values most of the time you need to use <code><a href="#CLIP:RESOLVE-VALUE">RESOLVE-VALUE</a></code> (or its shorthand <code><a href="#CLIP:RESOLVE-ATTRIBUTE">RESOLVE-ATTRIBUTE</a></code>) unless you want to whip up your own system for one reason or another.</p>
+<p>You can define new tag and attribute processors with the macros <code><a href="#CLIP:DEFINE-TAG-PROCESSOR">DEFINE-TAG-PROCESSOR</a></code> and <code><a href="#CLIP:DEFINE-ATTRIBUTE-PROCESSOR">DEFINE-ATTRIBUTE-PROCESSOR</a></code>. For tag processors you will usually want to make sure to call <code><a href="#CLIP:PROCESS-ATTRIBUTES">PROCESS-ATTRIBUTES</a></code> and <code><a href="#CLIP:PROCESS-CHILDREN">PROCESS-CHILDREN</a></code> to ensure that tags and attributes within are properly processed. To retrieve values most of the time you need to use <code><a href="#CLIP:RESOLVE-VALUE">RESOLVE-VALUE</a></code> (or its shorthand <code><a href="#CLIP:RESOLVE-ATTRIBUTE">RESOLVE-ATTRIBUTE</a></code>) unless you want to whip up your own system for one reason or another. All tags that you define will automatically be prefixed with 'C:' in order to help highlighting template tags and ensure that there are no collisions with existing tags.</p>
 
 <h2>Further Reading</h2>
 
