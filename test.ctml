@@ -20,80 +20,80 @@
   <body>
     <article id="thread-op" class="post">
       <a name="0" />
-      <using field=":thread">
+      <c:using field=":thread">
         <header>
-          <h1>Thread #<splice lquery="(text id)">ID</splice></h1>
+          <h1>Thread #<c:splice lquery="(text id)">ID</c:splice></h1>
           <div class="author">
             <c:profile user="author" />
           </div>
           <ul iterate="tags">
             <li count="">
-              <if>
-                <test>
+              <c:if>
+                <c:test>
                   (series-p *)
-                </test>
-                <then>
+                </c:test>
+                <c:then>
                   <a class="tag series" lquery="(text *)">TAG</a>
-                </then>
-                <else>
+                </c:then>
+                <c:else>
                   <a class="tag" lquery="(text *)">TAG</a>
-                </else>
-              </if>
+                </c:else>
+              </c:if>
             </li>
             this text will be discarded
           </ul>
         </header>
         <section class="content">
-          <noop as="blockquote">
+          <c:noop as="blockquote">
             This is some user generated content or something that contains <c:lip>tags</c:lip> and other things that would otherwise be parsed.
             Thanks to the <b lquery="(text foo)">noop</b> tag though, no transformations will take place.
-          </noop>
+          </c:noop>
         </section>
         <footer>
           <nav id="postedit">
-            <when test="(editable-p *)">
+            <c:when test="(editable-p *)">
               <li><a href="#" lquery="(attr :href (format NIL &quot;/edit/~a&quot; id))">Edit</a></li>
-            </when>
+            </c:when>
             <li><a href="#0">Permalink</a></li>
           </nav>
         </footer>
-      </using>
+      </c:using>
     </article>
     <section id="replies">
-      <let posts="(thread-posts :thread)" thread=":thread">
-        <iterate over="posts" as="ul">
+      <c:let posts="(thread-posts :thread)" thread=":thread">
+        <c:iterate over="posts" as="ul">
           <li eval="(increase-post-count)">
             <article class="post">
               <a name="n" lquery="(attr :name (post-count))" />
               <header>
-                <unless test="(anonymous-p author)">
+                <c:unless test="(anonymous-p author)">
                   <div class="author">
                     <c:profile user="author" />
                   </div>
-                </unless>
+                </c:unless>
               </header>
               <section class="content">
-                <noop as="blockquote">
+                <c:noop as="blockquote">
                   This is some user generated content or something that contains <c:lip>tags</c:lip> and other things that would otherwise be parsed.
                   Thanks to the <b lquery="(text foo)">noop</b> tag though, no transformations will take place.
-                </noop>
+                </c:noop>
               </section>
               <footer>
                 <nav id="postedit">
-                  <when test="(editable-p *)">
+                  <c:when test="(editable-p *)">
                     <li><a href="#" lquery="(attr :href (format NIL &quot;/edit/~a&quot; id))">Edit</a></li>
-                  </when>
+                  </c:when>
                   <li><a href="#" lquery="(attr :href (format NIL &quot;#~a&quot; (post-count)))">Permalink</a></li>
                 </nav>
               </footer>
             </article>
           </li>
-        </iterate>
-      </let>
+        </c:iterate>
+      </c:let>
     </section>
-    <expand as="footer" lquery="(attr :lquery (compute-footer-actions :thread))">
+    <c:expand as="footer" lquery="(attr :lquery (compute-footer-actions :thread))">
       FOOTER
-    </expand>
+    </c:expand>
     <c:js>
       $(function(){
           console.log("I guess this tag could do some special JS analysis and insert missing libs or something, idk.");
