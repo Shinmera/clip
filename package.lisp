@@ -24,7 +24,8 @@
    #:clipboard
    #:make-clipboard
    #:resolve-value
-   #:resolve-attribute)
+   #:resolve-attribute
+   #:parse-and-resolve)
   ;; processor.lisp
   (:export
    #:process)
