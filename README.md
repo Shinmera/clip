@@ -68,6 +68,10 @@ Extending Clip
 --------------
 You can define new tag and attribute processors with the macros `DEFINE-TAG-PROCESSOR` and `DEFINE-ATTRIBUTE-PROCESSOR`. For tag processors you will usually want to make sure to call `PROCESS-ATTRIBUTES` and `PROCESS-CHILDREN` to ensure that tags and attributes within are properly processed. To retrieve values most of the time you need to use `RESOLVE-VALUE` (or its shorthand `RESOLVE-ATTRIBUTE`) unless you want to whip up your own system for one reason or another. All tags that you define will automatically be prefixed with 'C:' in order to help highlighting template tags and ensure that there are no collisions with existing tags.
 
+Editor Support
+--------------
+The Emacs extension [Web-Mode](http://web-mode.org/)(version 9.0.77+) provides syntax highlighting for Clip templates. In order for it to recognise the templates, use the `.ctml` file extension. A huge thanks goes to [Bois Francois-Xavier](https://github.com/fxbois) for adding the support.
+
 Further Reading
 ---------------
 * [Plump](https://shinmera.github.io/plump)
