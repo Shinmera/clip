@@ -21,7 +21,7 @@ The value returned by `PROCESS` is the node you passed into it. You can parse th
 Standard Tags
 -------------
 * NOOP <br />
-  Does exactly nothing. This tag does not process any of its attributes or any of its child-tags. Can be useful to stop transformation of nodes further in.
+  This tag only processes its attributes, but none of its children.
 
 * LET <br />
   Creates a new clipboard environment with all the tag attributes bound in the following manner: The attribute key is put into the clipboard as if by READ and associated with the value of `RESOLVE-VALUE` of the attribute value.
