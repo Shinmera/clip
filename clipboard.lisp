@@ -11,7 +11,9 @@
 Once the binding is left, they are popped off the stack again.")
 
 (defclass clipboard ()
-  ((%clipboard-env :initarg :env :initform (make-hash-table :test 'equalp) :accessor clipboard-env)))
+  ((%clipboard-env :initarg :env :initform (make-hash-table :test 'equalp) :accessor clipboard-env))
+  (:documentation "Special class for clipboard environments. Use CLIPBOARD or CLIP to access and set values within.
+Field names are automatically transformed into strings as per STRING. Access is case-insensitive."))
 
 (defun make-clipboard (&rest fields)
   "Creates a new clipboard using the specified fields (like a plist)."
@@ -21,9 +23,16 @@ Once the binding is left, they are popped off the stack again.")
     (make-instance 'clipboard :env table)))
 
 (defmacro with-clipboard-bound ((new-clipboard &rest fields) &body body)
-  `(let ((*clipboard-stack* (cons ,new-clipboard *clipboard-stack*)))
-     ,@(loop for (field value) on fields by #'cddr collect `(setf (clipboard ,field) ,value))
-     ,@body))
+  "Executes the body with the new clipboard on the *CLIPBOARD-STACK*.
+
+If fields are provided, they are set on the NEW-CLIPBOARD in plist fashion as per consecutive SETF.
+This means that side-effects of an early field set affect later fields. The fields are evaluated
+before the NEW-CLIPBOARD is pushed onto the *CLIPBOARD-STACK*."
+  (let ((clipboard (gensym "CLIPBOARD")))
+    `(let ((,clipboard ,new-clipboard))
+       ,@(loop for (field value) on fields by #'cddr collect `(setf (clip ,clipboard ,field) ,value))
+       (let ((*clipboard-stack* (cons ,clipboard *clipboard-stack*)))
+         ,@body))))
 
 (defgeneric clip (object field)
   (:documentation "Generic object accessor.
