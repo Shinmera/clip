@@ -6,15 +6,24 @@
 
 (in-package #:org.tymoonnext.clip)
 
-(defvar *clipboard* NIL
-  "Template storage object.")
+(defvar *clipboard-stack* NIL
+  "Template storage stack. When new clipboards are bound, they are pushed onto the stack.
+Once the binding is left, they are popped off the stack again.")
+
+(defclass clipboard ()
+  ((%clipboard-env :initarg :env :initform (make-hash-table :test 'equalp) :accessor clipboard-env)))
 
 (defun make-clipboard (&rest fields)
   "Creates a new clipboard using the specified fields (like a plist)."
-  (let ((table (make-hash-table)))
+  (let ((table (make-hash-table :test 'equalp)))
     (loop for (key val) on fields by #'cddr
-          do (setf (gethash key table) val))
-    table))
+          do (setf (gethash (string key) table) val))
+    (make-instance 'clipboard :env table)))
+
+(defmacro with-clipboard-bound ((new-clipboard &rest fields) &body body)
+  `(let ((*clipboard-stack* (cons ,new-clipboard *clipboard-stack*)))
+     ,@(loop for (field value) on fields by #'cddr collect `(setf (clipboard ,field) ,value))
+     ,@body))
 
 (defgeneric clip (object field)
   (:documentation "Generic object accessor.
@@ -25,12 +34,19 @@ If you want to get special treatment of objects or types, define your own method
 If you want to get special treatment of objects or types, define your own methods on this."))
 
 (defun clipboard (field)
-  "Shorthand for (CLIP *CLIPBOARD* FIELD)"
-  (clip *clipboard* field))
+  "Shorthand for (CLIP (FIRST *CLIPBOARD-STACK*) FIELD)"
+  (clip (first *clipboard-stack*) field))
 
 (defun (setf clipboard) (value field)
-  "Shorthand for (SETF (CLIP *CLIPBOARD* FIELD) VALUE)"
-  (setf (clip *clipboard* field) value))
+  "Shorthand for (SETF (CLIP (FIRST *CLIPBOARD-STACK*) FIELD) VALUE)"
+  (setf (clip (first *clipboard-stack*) field) value))
+
+(defmethod clip ((board clipboard) field)
+  "Accessor for the clipboard object."
+  (gethash (string field) (clipboard-env board)))
+
+(defmethod (setf clip) (value (board clipboard) field)
+  (setf (gethash (string field) (clipboard-env board)) value))
 
 (defmethod clip ((table hash-table) field)
   "Generic hash-table accessor."
@@ -82,8 +98,9 @@ This is usually used in combination with READ-FROM-STRING of an attribute value.
 If the symbol is EQL to '* the *CLIPBOARD* is returned,
 If the symbol is a keyword the symbol itself is returned,
 otherwise the value of (CLIPBOARD SYMBOL) is returned."
-  (cond ((eql symbol '*)
-         *clipboard*)
+  (cond ((loop for char across (symbol-name symbol)
+               always (char= char #\*))
+         (nth (1- (length (symbol-name symbol))) *clipboard-stack*))
         ((keywordp symbol)
          symbol)
         (T (clipboard symbol))))
