@@ -18,4 +18,6 @@
     *target*))
 
 (defun process-to-string (target &rest fields)
-  (plump:serialize (apply #'process target fields)))
+  "Same as PROCESS, but automatically performs PLUMP:SERIALIZE on the result to a string."
+  (with-output-to-string (stream)
+    (plump:serialize (apply #'process target fields) stream)))
