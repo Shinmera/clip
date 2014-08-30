@@ -82,7 +82,7 @@ is done."
 (define-tag-processor let (node)
   (let ((table (make-hash-table :test 'equalp)))
     (maphash #'(lambda (key val)
-                 (setf (clip table (string (read-from-string key)))
+                 (setf (clip table key)
                        (parse-and-resolve val)))
              (plump:attributes node))
     (with-clipboard-bound ((make-instance 'clipboard :env table))
