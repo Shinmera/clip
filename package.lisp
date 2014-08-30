@@ -19,16 +19,19 @@
    #:process-attributes)
   ;; clipboard.lisp
   (:export
-   #:*clipboard*
-   #:clip
+   #:*clipboard-stack*
    #:clipboard
    #:make-clipboard
+   #:with-clipboard-bound
+   #:clip
+   #:clipboard
    #:resolve-value
    #:resolve-attribute
    #:parse-and-resolve)
   ;; processor.lisp
   (:export
-   #:process)
+   #:process
+   #:process-to-string)
   ;; tag-processors.lisp
   (:export
    #:*tag-processors*
