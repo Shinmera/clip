@@ -30,12 +30,12 @@ Otherwise returns NIL. See *ATTRIBUTE-PROCESSORS*."
 See *ATTRIBUTE-PROCESSORS*."
   (setf (gethash attribute *attribute-processors*) func))
 
-(defun process-attribute (attribute value)
+(defun process-attribute (node attribute value)
   "Processes the specified attribute using the given value.
 If no attribute processor can be found, nothing is done.
-See *TARGET*, *ATTRIBUTE-PROCESSORS*."
+See *ATTRIBUTE-PROCESSORS*."
   (let ((func (attribute-processor attribute)))
-    (when func (funcall func *target* value))))
+    (when func (funcall func node value))))
 
 (defmacro define-attribute-processor (attribute (node value) &body body)
   "Defines a new attribute processor.
@@ -50,7 +50,8 @@ BODY      ::= form*"
 (defun process-attributes (node)
   "Processes all attributes on the node.
 See PROCESS-ATTRIBUTE."
-  (maphash #'process-attribute (plump:attributes node)))
+  (maphash #'(lambda (attr val) (process-attribute node attr val))
+           (plump:attributes node)))
 
 (define-attribute-processor lquery (node value)
   (let ((actions (typecase value
@@ -71,7 +72,7 @@ See PROCESS-ATTRIBUTE."
         (new-children (plump:make-child-array))
         (target (plump:first-element node)))
     (flet ((process (item)
-             (let ((*clipboard* item))
+             (with-clipboard-bound (item)
                (vector-push-extend
                 (process-node (plump:clone-node target))
                 new-children))))
