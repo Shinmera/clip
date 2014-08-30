@@ -8,11 +8,14 @@
 
 (defun process (target &rest fields)
   "Processes all clip markup on the target with the given FIELDS used to initialise the clipboard."
-  (let ((*clipboard* (apply #'make-clipboard fields))
-        (*target-counter* 0)
+  (let ((*target-counter* 0)
         (*target* (etypecase target
                     (plump:node target)
                     (pathname (plump:parse target))
                     (string (plump:parse target)))))
-    (process-node *target*)
+    (with-clipboard-bound ((apply #'make-clipboard fields))
+      (process-node *target*))
     *target*))
+
+(defun process-to-string (target &rest fields)
+  (plump:serialize (apply #'process target fields)))
