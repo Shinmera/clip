@@ -134,14 +134,14 @@ In order to manipulate the clipboard bindings you can use the `C:USING` and `C:L
 (clip:process-to-string
  "&lt;ul iterate=\"articles\"&gt;
   &lt;li&gt;&lt;article&gt;
-    &lt;header&gt;&lt;div class=\"author\" lquery=\"(text (clip ** :author))\"&gt;AUTHOR&lt;/div&gt;&lt;/header&gt;
+    &lt;header&gt;&lt;div class=\"author\" lquery=\"(text (** :author))\"&gt;AUTHOR&lt;/div&gt;&lt;/header&gt;
     &lt;section class=\"content\" lquery=\"(text *)\"&gt;CONTENT&lt;/section&gt;
   &lt;/article&gt;&lt;/li&gt;
 &lt;/ul&gt;"
  :author "Max Mastermind" :articles '("Whoa I am blogging!!" "I don't know what to write, sadface."))
 ```
 
-Sometimes you need to refer to values in clipboards outside of the current binding. No worries, this is easy to do as the clipboards are organised using a stack. You can reach clipboards higher up in the stack using the asterisk symbols. Each asterisk more is one clipboard higher.
+Sometimes you need to refer to values in clipboards outside of the current binding. No worries, this is easy to do as the clipboards are organised using a stack. You can reach clipboards higher up in the stack using the asterisk symbols. Each asterisk more is one clipboard higher. Using the asterisk symbol as a variable returns the clipboard directly, using it as a function call is akin to doing `(CLIP ** thing)`. In order to avoid clashing with the `*` multiplication function, the asterisk function shorthand is only active for two or more asterisks.
 
 Further Reading
 ---------------

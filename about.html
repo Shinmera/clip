@@ -8,7 +8,7 @@
       h1{display:inline-block;font-size: 28pt;margin-bottom:0;}
       code{font-family: Consolas, Inconsolata, monospace;}
       h4{display: inline-block;margin:0;padding:0;}
-      ul{list-style: none;}
+      #symbol-index ul{list-style: none;}
       .package li{margin-bottom: 20px;}
       .package pre{margin: 0 0 0 10px; white-space: pre-wrap;}
       .package .nicknames{font-size: 12pt; font-weight: normal;}
@@ -18,8 +18,8 @@
   </head>
   <body>
     <header>
-      <h1>clip</h1>
-      <span>0.5.1</span>
+      <h1><img src="clip-logo.png" alt="clip"/></h1>
+      <span>0.5.2</span>
       <p>An HTML templating engine using Plump.</p>
     </header>
     <div id="content">
@@ -73,10 +73,10 @@
 <ul>
 <li><p><code>AS</code> <br/>
   Simply changes that node's tag-name to the value of this attribute.</p></li>
-<li><p><code><a href="http://l1sp.org/cl/COUNT">COUNT</a></code> <br/>
+<li><p><code><a href="http://l1sp.org/cl/count">COUNT</a></code> <br/>
   Inserts the value of <code><a href="#CLIP:*TARGET-COUNT*">*TARGET-COUNT*</a></code> as the attribute value. This is useful to follow processing order during debugging.</p></li>
-<li><p><code><a href="http://l1sp.org/cl/EVAL">EVAL</a></code> <br/>
-  Simply calls <code><a href="http://l1sp.org/cl/EVAL">EVAL</a></code> on the value of <code><a href="http://l1sp.org/cl/READ-FROM-STRING">READ-FROM-STRING</a></code> of the attribute value.</p></li>
+<li><p><code><a href="http://l1sp.org/cl/eval">EVAL</a></code> <br/>
+  Simply calls <code><a href="http://l1sp.org/cl/eval">EVAL</a></code> on the value of <code><a href="http://l1sp.org/cl/read-from-string">READ-FROM-STRING</a></code> of the attribute value.</p></li>
 <li><p><code>ITERATE</code> <br/>
   The value (as by <code><a href="#CLIP:RESOLVE-VALUE">RESOLVE-VALUE</a></code>) is used as an iteration list or vector. The first node within the node this attribute belongs to is copied once for each item in the iteration list and processed with that item used as the clipboard.</p></li>
 <li><p><code>LQUERY</code> <br/>
@@ -101,7 +101,7 @@
  &quot;&lt;span lquery=\&quot;(text text) (add-class class)\&quot; /&gt;&quot;
  :text &quot;Hi!&quot; :class &quot;clip-text&quot;)</code></pre>
 
-<p>Explanation: The <code>LQUERY</code> attribute allows you to perform lQuery operations on the node it is an attribute of. In this case, the <code>TEXT</code> function sets the text of the node to the value of <code>TEXT</code>, which we told Clip to be <code>&quot;Hi!&quot;</code>. Similarly for <code>ADD-CLASS</code>. Any non-keyword symbol within the template is automatically resolved to a field on the current clipboard. You may think of the clipboard as a form of lexical environment for the template, which we currently set to have the variables <code>TEXT</code> and <code><a href="http://l1sp.org/cl/CLASS">CLASS</a></code> bound. The default <code><a href="#CLIP:CLIPBOARD">CLIPBOARD</a></code> object is special in the sense that it does not differentiate between accessing it with keywords, symbols or strings and is case-insensitive. This makes it easier to access in templates.</p>
+<p>Explanation: The <code>LQUERY</code> attribute allows you to perform lQuery operations on the node it is an attribute of. In this case, the <code>TEXT</code> function sets the text of the node to the value of <code>TEXT</code>, which we told Clip to be <code>&quot;Hi!&quot;</code>. Similarly for <code>ADD-CLASS</code>. Any non-keyword symbol within the template is automatically resolved to a field on the current clipboard. You may think of the clipboard as a form of lexical environment for the template, which we currently set to have the variables <code>TEXT</code> and <code><a href="http://l1sp.org/cl/class">CLASS</a></code> bound. The default <code><a href="#CLIP:CLIPBOARD">CLIPBOARD</a></code> object is special in the sense that it does not differentiate between accessing it with keywords, symbols or strings and is case-insensitive. This makes it easier to access in templates.</p>
 
 <p>Please see the <a href="https://shinmera.github.io/lquery">lQuery</a> documentation for all possible node manipulation functions.</p>
 
@@ -127,8 +127,8 @@
 
 <pre><code>(<a href="#CLIP:PROCESS-TO-STRING">clip:process-to-string</a>
  &quot;&lt;c:using value=\&quot;num\&quot;&gt;
-  &lt;c:let orig=\&quot;*\&quot; double=\&quot;(<a href="http://l1sp.org/cl/*">*</a> * 2)\&quot; square=\&quot;(<a href="http://l1sp.org/cl/EXPT">expt</a> * 2)\&quot; root=\&quot;(<a href="http://l1sp.org/cl/SQRT">sqrt</a> *)\&quot;&gt;
-    &lt;span lquery=\&quot;(text (<a href="http://l1sp.org/cl/LIST">list</a> orig double square root))\&quot; /&gt;
+  &lt;c:let orig=\&quot;*\&quot; double=\&quot;(<a href="http://l1sp.org/cl/*">*</a> * 2)\&quot; square=\&quot;(<a href="http://l1sp.org/cl/expt">expt</a> * 2)\&quot; root=\&quot;(<a href="http://l1sp.org/cl/sqrt">sqrt</a> *)\&quot;&gt;
+    &lt;span lquery=\&quot;(text (<a href="http://l1sp.org/cl/list">list</a> orig double square root))\&quot; /&gt;
   &lt;/c:let&gt;
 &lt;/c:using&gt;&quot;
  :num 2)</code></pre>
@@ -140,13 +140,13 @@
 <pre><code>(<a href="#CLIP:PROCESS-TO-STRING">clip:process-to-string</a>
  &quot;&lt;ul iterate=\&quot;articles\&quot;&gt;
   &lt;li&gt;&lt;article&gt;
-    &lt;header&gt;&lt;div class=\&quot;author\&quot; lquery=\&quot;(text (<a href="#CLIP:CLIP">clip</a> ** :author))\&quot;&gt;AUTHOR&lt;/div&gt;&lt;/header&gt;
+    &lt;header&gt;&lt;div class=\&quot;author\&quot; lquery=\&quot;(text (<a href="http://l1sp.org/cl/**">**</a> :author))\&quot;&gt;AUTHOR&lt;/div&gt;&lt;/header&gt;
     &lt;section class=\&quot;content\&quot; lquery=\&quot;(text *)\&quot;&gt;CONTENT&lt;/section&gt;
   &lt;/article&gt;&lt;/li&gt;
 &lt;/ul&gt;&quot;
  :author &quot;Max Mastermind&quot; :articles '(&quot;Whoa I am blogging!!&quot; &quot;I don't know what to write, sadface.&quot;))</code></pre>
 
-<p>Sometimes you need to refer to values in clipboards outside of the current binding. No worries, this is easy to do as the clipboards are organised using a stack. You can reach clipboards higher up in the stack using the asterisk symbols. Each asterisk more is one clipboard higher.</p>
+<p>Sometimes you need to refer to values in clipboards outside of the current binding. No worries, this is easy to do as the clipboards are organised using a stack. You can reach clipboards higher up in the stack using the asterisk symbols. Each asterisk more is one clipboard higher. Using the asterisk symbol as a variable returns the clipboard directly, using it as a function call is akin to doing <code>(<a href="#CLIP:CLIP">CLIP</a> ** thing)</code>.</p>
 
 <h2>Further Reading</h2>
 
@@ -161,7 +161,7 @@
         <h2>Copyright</h2>
         <span>clip</span> is licensed under the <span><a href="https://tldrlegal.com/search?q=Artistic">Artistic</a></span> license and ©<span>2014</span> <span>Nicolas Hafner &lt;shinmera@tymoon.eu&gt;</span>. This library can be obtained on <a href="https://github.com/Shinmera/clip">https://github.com/Shinmera/clip</a>.
       </article>
-      <article>
+      <article id="symbol-index">
         <h2>Package Index</h2>
         <ul><li class="package">
             <h3>
