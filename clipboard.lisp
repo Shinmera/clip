@@ -131,19 +131,24 @@ applied with all arguments of the list (which are first
 all individually passed to RESOLVE-VALUE too)."
   (let ((func (car list))
         (args (cdr list)))
-    (case func
-      (quote (first args))
-      (function (symbol-function (first args)))
-      (or (loop for arg in args
-                thereis (resolve-value arg)))
-      (and (loop for arg in args
-                 for val = (resolve-value arg)
-                 when (not val)
-                   do (return)
-                 finally (return val)))
-      (T (apply (or (multiple-value-bind (s e) (find-symbol (string func) :clip)
-                      (when (and s (eql e :external) (fboundp s)) s)) func)
-                (mapcar #'resolve-value args))))))
+    (cond ((loop for char across (symbol-name func)
+                 always (char= char #\*))
+           (clip (nth (1- (length (symbol-name func))) *clipboard-stack*)
+                 (resolve-value (first args))))
+          (T
+           (case func
+             (quote (first args))
+             (function (symbol-function (first args)))
+             (or (loop for arg in args
+                         thereis (resolve-value arg)))
+             (and (loop for arg in args
+                        for val = (resolve-value arg)
+                        when (not val)
+                          do (return)
+                        finally (return val)))
+             (T (apply (or (multiple-value-bind (s e) (find-symbol (string func) :clip)
+                             (when (and s (eql e :external) (fboundp s)) s)) func)
+                       (mapcar #'resolve-value args))))))))
 
 (defun resolve-attribute (node attr)
   "Shorthand to resolve the value of an attibute.
