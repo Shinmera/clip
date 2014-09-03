@@ -131,8 +131,9 @@ applied with all arguments of the list (which are first
 all individually passed to RESOLVE-VALUE too)."
   (let ((func (car list))
         (args (cdr list)))
-    (cond ((loop for char across (symbol-name func)
-                 always (char= char #\*))
+    (cond ((and (loop for char across (symbol-name func)
+                      always (char= char #\*))
+                (<= 2 (length (symbol-name func))))
            (clip (nth (1- (length (symbol-name func))) *clipboard-stack*)
                  (resolve-value (first args))))
           (T
