@@ -146,7 +146,7 @@
 &lt;/ul&gt;&quot;
  :author &quot;Max Mastermind&quot; :articles '(&quot;Whoa I am blogging!!&quot; &quot;I don't know what to write, sadface.&quot;))</code></pre>
 
-<p>Sometimes you need to refer to values in clipboards outside of the current binding. No worries, this is easy to do as the clipboards are organised using a stack. You can reach clipboards higher up in the stack using the asterisk symbols. Each asterisk more is one clipboard higher. Using the asterisk symbol as a variable returns the clipboard directly, using it as a function call is akin to doing <code>(<a href="#CLIP:CLIP">CLIP</a> ** thing)</code>.</p>
+<p>Sometimes you need to refer to values in clipboards outside of the current binding. No worries, this is easy to do as the clipboards are organised using a stack. You can reach clipboards higher up in the stack using the asterisk symbols. Each asterisk more is one clipboard higher. Using the asterisk symbol as a variable returns the clipboard directly, using it as a function call is akin to doing <code>(<a href="#CLIP:CLIP">CLIP</a> ** 'thing)</code>. In order to avoid clashing with the <code>*</code> multiplication function, the asterisk function shorthand is only active for two or more asterisks.</p>
 
 <h2>Further Reading</h2>
 
