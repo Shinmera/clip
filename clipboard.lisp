@@ -112,6 +112,10 @@ otherwise the value of (CLIPBOARD SYMBOL) is returned."
          (nth (1- (length (symbol-name symbol))) *clipboard-stack*))
         ((keywordp symbol)
          symbol)
+        ((eq symbol T)
+         T)
+        ((eq symbol NIL)
+         NIL)
         (T (clipboard symbol))))
 
 (defmethod resolve-value ((list list))
