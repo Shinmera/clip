@@ -179,3 +179,8 @@ is done."
   (with-clipboard-bound ((resolve-attribute node "value"))
     (process-children node)
     (process-tag "splice" node)))
+
+(define-tag-processor import (node)
+  (let ((path (merge-pathnames (resolve-attribute node "file"))))
+    (plump:parse path :root node)
+    (process-tag "splice" node)))
