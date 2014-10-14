@@ -18,7 +18,7 @@
   </head>
   <body>
     <header>
-      <h1><img src="clip-logo.png" alt="clip"/></h1>
+      <h1>clip</h1>
       <span>0.5.2</span>
       <p>An HTML templating engine using Plump.</p>
     </header>
@@ -99,7 +99,8 @@
 
 <pre><code>(<a href="#CLIP:PROCESS-TO-STRING">clip:process-to-string</a>
  &quot;&lt;span lquery=\&quot;(text text) (add-class class)\&quot; /&gt;&quot;
- :text &quot;Hi!&quot; :class &quot;clip-text&quot;)</code></pre>
+ :text &quot;Hi!&quot; :class &quot;clip-text&quot;)
+</code></pre>
 
 <p>Explanation: The <code>LQUERY</code> attribute allows you to perform lQuery operations on the node it is an attribute of. In this case, the <code>TEXT</code> function sets the text of the node to the value of <code>TEXT</code>, which we told Clip to be <code>&quot;Hi!&quot;</code>. Similarly for <code>ADD-CLASS</code>. Any non-keyword symbol within the template is automatically resolved to a field on the current clipboard. You may think of the clipboard as a form of lexical environment for the template, which we currently set to have the variables <code>TEXT</code> and <code><a href="http://l1sp.org/cl/class">CLASS</a></code> bound. The default <code><a href="#CLIP:CLIPBOARD">CLIPBOARD</a></code> object is special in the sense that it does not differentiate between accessing it with keywords, symbols or strings and is case-insensitive. This makes it easier to access in templates.</p>
 
@@ -109,7 +110,8 @@
 
 <pre><code>(<a href="#CLIP:PROCESS-TO-STRING">clip:process-to-string</a>
  &quot;&lt;ol iterate=\&quot;todo-list\&quot;&gt;&lt;li lquery=\&quot;(text *)\&quot;&gt;&lt;/li&gt;&lt;/ol&gt;&quot;
- :todo-list '(&quot;Write tutorials&quot; &quot;Make tiramisù&quot; &quot;Visit grandma&quot;))</code></pre>
+ :todo-list '(&quot;Write tutorials&quot; &quot;Make tiramisù&quot; &quot;Visit grandma&quot;))
+</code></pre>
 
 <p>The <code>ITERATE</code> attribute goes over the list or vector of elements its attribute-value resolves to and uses each item as the current clipboard for the iteration element. Since in this case these values themselves are direct strings we cannot retrieve further values from them and instead need to use <code>*</code> to refer to the entire clipboard.</p>
 
@@ -119,7 +121,8 @@
  &quot;&lt;ul iterate=\&quot;users\&quot;&gt;
   &lt;li&gt;&lt;c:if test=\&quot;anonymous\&quot;&gt;&lt;c:then&gt;Username Hidden&lt;/c:then&gt;&lt;c:else lquery=\&quot;(text username)\&quot;/&gt;&lt;/c:if&gt;&lt;/li&gt;
 &lt;/ul&gt;&quot;
- :users '((:username &quot;Some Guy&quot; :anonymous T) (:username &quot;Some Other Guy&quot; :anonymous NIL) (:username &quot;You&quot; :anonymous NIL)))</code></pre>
+ :users '((:username &quot;Some Guy&quot; :anonymous T) (:username &quot;Some Other Guy&quot; :anonymous NIL) (:username &quot;You&quot; :anonymous NIL)))
+</code></pre>
 
 <p>Clip offers a couple of constructs to perform conditionals. These constructs are <code>C:WHEN</code> <code>C:UNLESS</code> and <code>C:IF</code>, after their CL equivalents. Each take an attribute called <code>TEST</code> that has to resolve to a non-NIL value to be taken as true. In the case of <code>C:IF</code>, three special local child tags are used: <code>C:THEN</code>, <code>C:ELSE</code> and <code>C:TEST</code>. The <code>C:TEST</code> tag can be used as an alternative to the test attribute. The other two should be self-explanatory. Note that none of the child-tags or attributes of an unchosen branch are processed.</p>
 
@@ -131,7 +134,8 @@
     &lt;span lquery=\&quot;(text (<a href="http://l1sp.org/cl/list">list</a> orig double square root))\&quot; /&gt;
   &lt;/c:let&gt;
 &lt;/c:using&gt;&quot;
- :num 2)</code></pre>
+ :num 2)
+</code></pre>
 
 <p>In order to manipulate the clipboard bindings you can use the <code>C:USING</code> and <code>C:LET</code> special tags. <code>C:USING</code> replaces the clipboard environment with what the value of its <code>VALUE</code> attribute resolves to. <code>C:LET</code> on the other hand creates a new <code><a href="#CLIP:CLIPBOARD">CLIPBOARD</a></code> object, setting the specified symbol/value pairs from its attributes.</p>
 
@@ -144,9 +148,21 @@
     &lt;section class=\&quot;content\&quot; lquery=\&quot;(text *)\&quot;&gt;CONTENT&lt;/section&gt;
   &lt;/article&gt;&lt;/li&gt;
 &lt;/ul&gt;&quot;
- :author &quot;Max Mastermind&quot; :articles '(&quot;Whoa I am blogging!!&quot; &quot;I don't know what to write, sadface.&quot;))</code></pre>
+ :author &quot;Max Mastermind&quot; :articles '(&quot;Whoa I am blogging!!&quot; &quot;I don't know what to write, sadface.&quot;))
+</code></pre>
 
 <p>Sometimes you need to refer to values in clipboards outside of the current binding. No worries, this is easy to do as the clipboards are organised using a stack. You can reach clipboards higher up in the stack using the asterisk symbols. Each asterisk more is one clipboard higher. Using the asterisk symbol as a variable returns the clipboard directly, using it as a function call is akin to doing <code>(<a href="#CLIP:CLIP">CLIP</a> ** 'thing)</code>. In order to avoid clashing with the <code>*</code> multiplication function, the asterisk function shorthand is only active for two or more asterisks.</p>
+
+<h3>Function References</h3>
+
+<pre><code>(<a href="http://l1sp.org/cl/defun">defun</a> seconds () (<a href="http://l1sp.org/cl/decode-universal-time">decode-universal-time</a> (<a href="http://l1sp.org/cl/get-universal-time">get-universal-time</a>)))
+(<a href="#CLIP:PROCESS-TO-STRING">clip:process-to-string</a>
+ &quot;&lt;time lquery=\&quot;(text (seconds))\&quot;&gt;TIME&lt;/time&gt;&quot;)
+</code></pre>
+
+<p>Whenever you require to use functions within clip documents, you need to be aware of the current value of <code><a href="http://l1sp.org/cl/*package*">*package*</a></code>. As values that are resolved are first parsed using <code><a href="http://l1sp.org/cl/read">read</a></code>, they are influenced by <code><a href="http://l1sp.org/cl/*package*">*package*</a></code>. You can of course use fully qualified symbol names, but often times it is useful to bind the variable to the package you need to reduce verbosity.</p>
+
+<p>You must also be aware of the special resolving for symbols used as function calls within standard resolvings. As mentioned in the previous section, symbols only consisting of asterisks are specially handled. Additionally, the symbols <code><a href="http://l1sp.org/cl/quote">cl:quote</a></code>, <code><a href="http://l1sp.org/cl/function">cl:function</a></code>, <code><a href="http://l1sp.org/cl/or">cl:or</a></code>, <code><a href="http://l1sp.org/cl/and">cl:and</a></code>, <code><a href="http://l1sp.org/cl/if">cl:if</a></code>, <code><a href="http://l1sp.org/cl/when">cl:when</a></code>, or <code><a href="http://l1sp.org/cl/unless">cl:unless</a></code> are handled to function like their usual macro/special equivalents. Any other symbol is treated as follows: If a symbol with the same symbol-name is an external symbol of the <code><a href="#CLIP:CLIP">clip</a></code> package, the <code><a href="#CLIP:CLIP">clip</a></code> function is used. If not, the function named by the symbol in the symbol's package is used. This is done so that, no matter your package, you will always have access to functions like <code><a href="#CLIP:CLIP">clip</a></code> and <code><a href="#CLIP:CLIPBOARD">clipboard</a></code>. As an unfortunate side-effect of a symbol not knowing whether it was fully qualified or not, this means that even if you use the full symbol name with package in your template, as long as the name is external in <code><a href="#CLIP:CLIP">clip</a></code>, the <code><a href="#CLIP:CLIP">clip</a></code> function is used instead. You will have to use a combination of <code><a href="http://l1sp.org/cl/funcall">funcall</a></code> and <code>#'</code> instead.</p>
 
 <h2>Further Reading</h2>
 

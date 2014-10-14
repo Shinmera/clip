@@ -133,6 +133,16 @@ In order to manipulate the clipboard bindings you can use the `C:USING` and `C:L
 
 Sometimes you need to refer to values in clipboards outside of the current binding. No worries, this is easy to do as the clipboards are organised using a stack. You can reach clipboards higher up in the stack using the asterisk symbols. Each asterisk more is one clipboard higher. Using the asterisk symbol as a variable returns the clipboard directly, using it as a function call is akin to doing `(CLIP ** 'thing)`. In order to avoid clashing with the `*` multiplication function, the asterisk function shorthand is only active for two or more asterisks.
 
+###Function References
+
+    (defun seconds () (decode-universal-time (get-universal-time)))
+    (clip:process-to-string
+     "<time lquery=\"(text (seconds))\">TIME</time>")
+
+Whenever you require to use functions within clip documents, you need to be aware of the current value of `*package*`. As values that are resolved are first parsed using `read`, they are influenced by `*package*`. You can of course use fully qualified symbol names, but often times it is useful to bind the variable to the package you need to reduce verbosity.
+
+You must also be aware of the special resolving for symbols used as function calls within standard resolvings. As mentioned in the previous section, symbols only consisting of asterisks are specially handled. Additionally, the symbols `cl:quote`, `cl:function`, `cl:or`, `cl:and`, `cl:if`, `cl:when`, or `cl:unless` are handled to function like their usual macro/special equivalents. Any other symbol is treated as follows: If a symbol with the same symbol-name is an external symbol of the `clip` package, the `clip` function is used. If not, the function named by the symbol in the symbol's package is used. This is done so that, no matter your package, you will always have access to functions like `clip` and `clipboard`. As an unfortunate side-effect of a symbol not knowing whether it was fully qualified or not, this means that even if you use the full symbol name with package in your template, as long as the name is external in `clip`, the `clip` function is used instead. You will have to use a combination of `funcall` and `#'` instead.
+
 Further Reading
 ---------------
 * [Plump](https://shinmera.github.io/plump)
