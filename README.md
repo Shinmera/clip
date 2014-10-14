@@ -82,11 +82,9 @@ These are short tutorials to help explaining the effects of each tag and to illu
 
 ###Updating a node with values
 
-```
-(clip:process-to-string
- "&lt;span lquery=\"(text text) (add-class class)\" /&gt;"
- :text "Hi!" :class "clip-text")
-```
+    (clip:process-to-string
+     "<span lquery=\"(text text) (add-class class)\" />"
+     :text "Hi!" :class "clip-text")
 
 Explanation: The `LQUERY` attribute allows you to perform lQuery operations on the node it is an attribute of. In this case, the `TEXT` function sets the text of the node to the value of `TEXT`, which we told Clip to be `"Hi!"`. Similarly for `ADD-CLASS`. Any non-keyword symbol within the template is automatically resolved to a field on the current clipboard. You may think of the clipboard as a form of lexical environment for the template, which we currently set to have the variables `TEXT` and `CLASS` bound. The default `CLIPBOARD` object is special in the sense that it does not differentiate between accessing it with keywords, symbols or strings and is case-insensitive. This makes it easier to access in templates.
 
@@ -94,52 +92,44 @@ Please see the [lQuery](https://shinmera.github.io/lquery) documentation for all
 
 ###Populating from a list
 
-```
-(clip:process-to-string
- "&lt;ol iterate=\"todo-list\"&gt;&lt;li lquery=\"(text *)\"&gt;&lt;/li&gt;&lt;/ol&gt;"
- :todo-list '("Write tutorials" "Make tiramisù" "Visit grandma"))
-```
+    (clip:process-to-string
+     "<ol iterate=\"todo-list\"><li lquery=\"(text *)\"></li></ol>"
+     :todo-list '("Write tutorials" "Make tiramisù" "Visit grandma"))
 
 The `ITERATE` attribute goes over the list or vector of elements its attribute-value resolves to and uses each item as the current clipboard for the iteration element. Since in this case these values themselves are direct strings we cannot retrieve further values from them and instead need to use `*` to refer to the entire clipboard.
 
 ###Conditionals
 
-```
-(clip:process-to-string
- "&lt;ul iterate=\"users\"&gt;
-  &lt;li&gt;&lt;c:if test=\"anonymous\"&gt;&lt;c:then&gt;Username Hidden&lt;/c:then&gt;&lt;c:else lquery=\"(text username)\"/&gt;&lt;/c:if&gt;&lt;/li&gt;
-&lt;/ul&gt;"
- :users '((:username "Some Guy" :anonymous T) (:username "Some Other Guy" :anonymous NIL) (:username "You" :anonymous NIL)))
-```
+    (clip:process-to-string
+     "<ul iterate=\"users\">
+      <li><c:if test=\"anonymous\"><c:then>Username Hidden</c:then><c:else lquery=\"(text username)\"/></c:if></li>
+    </ul>"
+     :users '((:username "Some Guy" :anonymous T) (:username "Some Other Guy" :anonymous NIL) (:username "You" :anonymous NIL)))
 
 Clip offers a couple of constructs to perform conditionals. These constructs are `C:WHEN` `C:UNLESS` and `C:IF`, after their CL equivalents. Each take an attribute called `TEST` that has to resolve to a non-NIL value to be taken as true. In the case of `C:IF`, three special local child tags are used: `C:THEN`, `C:ELSE` and `C:TEST`. The `C:TEST` tag can be used as an alternative to the test attribute. The other two should be self-explanatory. Note that none of the child-tags or attributes of an unchosen branch are processed.
 
 ###Bindings
 
-```
-(clip:process-to-string
- "&lt;c:using value=\"num\"&gt;
-  &lt;c:let orig=\"*\" double=\"(* * 2)\" square=\"(expt * 2)\" root=\"(sqrt *)\"&gt;
-    &lt;span lquery=\"(text (list orig double square root))\" /&gt;
-  &lt;/c:let&gt;
-&lt;/c:using&gt;"
- :num 2)
-```
+    (clip:process-to-string
+     "<c:using value=\"num\">
+      <c:let orig=\"*\" double=\"(* * 2)\" square=\"(expt * 2)\" root=\"(sqrt *)\">
+        <span lquery=\"(text (list orig double square root))\" />
+      </c:let>
+    </c:using>"
+     :num 2)
 
 In order to manipulate the clipboard bindings you can use the `C:USING` and `C:LET` special tags. `C:USING` replaces the clipboard environment with what the value of its `VALUE` attribute resolves to. `C:LET` on the other hand creates a new `CLIPBOARD` object, setting the specified symbol/value pairs from its attributes.
 
 ###Clipboard Stack
 
-```
-(clip:process-to-string
- "&lt;ul iterate=\"articles\"&gt;
-  &lt;li&gt;&lt;article&gt;
-    &lt;header&gt;&lt;div class=\"author\" lquery=\"(text (** :author))\"&gt;AUTHOR&lt;/div&gt;&lt;/header&gt;
-    &lt;section class=\"content\" lquery=\"(text *)\"&gt;CONTENT&lt;/section&gt;
-  &lt;/article&gt;&lt;/li&gt;
-&lt;/ul&gt;"
- :author "Max Mastermind" :articles '("Whoa I am blogging!!" "I don't know what to write, sadface."))
-```
+    (clip:process-to-string
+     "<ul iterate=\"articles\">
+      <li><article>
+        <header><div class=\"author\" lquery=\"(text (** :author))\">AUTHOR</div></header>
+        <section class=\"content\" lquery=\"(text *)\">CONTENT</section>
+      </article></li>
+    </ul>"
+     :author "Max Mastermind" :articles '("Whoa I am blogging!!" "I don't know what to write, sadface."))
 
 Sometimes you need to refer to values in clipboards outside of the current binding. No worries, this is easy to do as the clipboards are organised using a stack. You can reach clipboards higher up in the stack using the asterisk symbols. Each asterisk more is one clipboard higher. Using the asterisk symbol as a variable returns the clipboard directly, using it as a function call is akin to doing `(CLIP ** 'thing)`. In order to avoid clashing with the `*` multiplication function, the asterisk function shorthand is only active for two or more asterisks.
 
