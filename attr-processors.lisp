@@ -90,7 +90,7 @@ See PROCESS-ATTRIBUTE."
   (declare (ignore value))
   (setf (plump:attribute node "count") (princ-to-string *target-counter*)))
 
-(define-attribute-processor modify (node value)
+(define-attribute-processor fill (node value)
   (flet ((modify (attribute object)
            (cl-ppcre:regex-replace-all
             "\\{.+?\\}" attribute
@@ -102,4 +102,4 @@ See PROCESS-ATTRIBUTE."
                (when value
                  (setf (plump:attribute node (string attribute))
                        (modify value (resolve-value object)))))))
-  (plump:remove-attribute node "modify"))
+  (plump:remove-attribute node "fill"))

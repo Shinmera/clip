@@ -68,7 +68,7 @@ Standard Attributes
 * `LQUERY` <br />
   Calls lQuery functions on the node as if by `($ node ..)`. Note that only lQuery functions are available, not its macros.
 
-* `MODIFY` <br />
+* `FILL` <br />
   The attribute value is read as a plist, the keys of which designate other attribute names and the values are resolved to the objects to use. For each named attribute, its value is modified by replacing `{thing}` by the result of `clip` on the respective object's field `thing`.
 
 Extending Clip
