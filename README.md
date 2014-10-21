@@ -68,6 +68,9 @@ Standard Attributes
 * `LQUERY` <br />
   Calls lQuery functions on the node as if by `($ node ..)`. Note that only lQuery functions are available, not its macros.
 
+* `MODIFY` <br />
+  The attribute value is read as a plist, the keys of which designate other attribute names and the values are resolved to the objects to use. For each named attribute, its value is modified by replacing `{thing}` by the result of `clip` on the respective object's field `thing`.
+
 Extending Clip
 --------------
 You can define new tag and attribute processors with the macros `DEFINE-TAG-PROCESSOR` and `DEFINE-ATTRIBUTE-PROCESSOR`. For tag processors you will usually want to make sure to call `PROCESS-ATTRIBUTES` and `PROCESS-CHILDREN` to ensure that tags and attributes within are properly processed. To retrieve values most of the time you need to use `RESOLVE-VALUE` (or its shorthand `RESOLVE-ATTRIBUTE`) unless you want to whip up your own system for one reason or another. All tags that you define will automatically be prefixed with `C:` in order to help highlighting template tags and ensure that there are no collisions with existing tags.
@@ -94,7 +97,7 @@ Please see the [lQuery](https://shinmera.github.io/lquery) documentation for all
 
     (clip:process-to-string
      "<ol iterate=\"todo-list\"><li lquery=\"(text *)\"></li></ol>"
-     :todo-list '("Write tutorials" "Make tiramisù" "Visit grandma"))
+     :todo-list '("Write tutorials" "Make tiramisu" "Visit grandma"))
 
 The `ITERATE` attribute goes over the list or vector of elements its attribute-value resolves to and uses each item as the current clipboard for the iteration element. Since in this case these values themselves are direct strings we cannot retrieve further values from them and instead need to use `*` to refer to the entire clipboard.
 

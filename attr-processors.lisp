@@ -89,3 +89,17 @@ See PROCESS-ATTRIBUTE."
 (define-attribute-processor count (node value)
   (declare (ignore value))
   (setf (plump:attribute node "count") (princ-to-string *target-counter*)))
+
+(define-attribute-processor modify (node value)
+  (flet ((modify (attribute object)
+           (cl-ppcre:regex-replace-all
+            "\\{.+?\\}" attribute
+            #'(lambda (target start end match-start match-end reg-starts reg-ends)
+                (declare (ignore start end reg-starts reg-ends))
+                (princ-to-string (clip:clip object (subseq target (1+ match-start) (1- match-end))))))))
+    (loop for (attribute object) on (read-from-string (format NIL "(~a)" value))
+          do (let ((value (plump:attribute node (string attribute))))
+               (when value
+                 (setf (plump:attribute node (string attribute))
+                       (modify value (resolve-value object)))))))
+  (plump:remove-attribute node "modify"))
