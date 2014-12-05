@@ -103,7 +103,7 @@ is done."
   (let ((family (plump:children node))
         (childcount (length new-children)))
     (when (< 0 childcount)
-      (plump::array-shift family :n (1- childcount) :from pos)
+      (array-utils:array-shift family :n (1- childcount) :from pos)
       (loop for i from 0 below childcount
             for child = (aref new-children i)
             do (setf (plump:parent child) node

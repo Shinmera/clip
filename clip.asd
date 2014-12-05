@@ -23,4 +23,5 @@
                (:file "attr-processors")
                (:file "tag-processors")
                (:file "processor"))
-  :depends-on (:lquery))
+  :depends-on (:array-utils
+               :lquery))
