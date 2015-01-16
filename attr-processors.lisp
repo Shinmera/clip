@@ -90,16 +90,37 @@ See PROCESS-ATTRIBUTE."
   (declare (ignore value))
   (setf (plump:attribute node "count") (princ-to-string *target-counter*)))
 
+
+(defun replace-region (string start end replacer)
+  (with-output-to-string (output)
+    (loop with filler = (make-string-output-stream)
+          with target = output
+          for char across string
+          do (cond
+               ((char= char start)
+                (setf target filler))
+               
+               ((char= char end)
+                (unless (eql target filler)
+                  (error "Unmatched closing."))
+                (princ (funcall replacer (get-output-stream-string filler)) output)
+                (close filler)
+                (setf target output)
+                (setf filler (make-string-output-stream)))
+               
+               (T (write-char char target)))
+          finally (if (eql target filler)
+                      (error "Unmatched opening.")
+                      (close filler)))))
+
 (define-attribute-processor fill (node value)
-  (flet ((modify (attribute object)
-           (cl-ppcre:regex-replace-all
-            "\\{.+?\\}" attribute
-            #'(lambda (target start end match-start match-end reg-starts reg-ends)
-                (declare (ignore start end reg-starts reg-ends))
-                (princ-to-string (clip:clip object (subseq target (1+ match-start) (1- match-end))))))))
-    (loop for (attribute object) on (read-from-string (format NIL "(~a)" value))
-          do (let ((value (plump:attribute node (string attribute))))
-               (when value
-                 (setf (plump:attribute node (string attribute))
-                       (modify value (resolve-value object)))))))
+  (loop for (attribute object) on (read-from-string (format NIL "(~a)" value))
+        for attr = (string attribute)
+        do (let ((value (plump:attribute node attr)))
+             (when value
+               (setf (plump:attribute node attr)
+                     (replace-region
+                      value #\{ #\}
+                      #'(lambda (value)
+                          (clip (resolve-value object) value)))))))
   (plump:remove-attribute node "fill"))
