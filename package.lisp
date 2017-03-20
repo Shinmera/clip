@@ -28,6 +28,16 @@
    #:resolve-value
    #:resolve-attribute
    #:parse-and-resolve)
+  ;; conditions.lisp
+  (:export
+   #:clip-condition
+   #:node-condition
+   #:attribute-condition
+   #:missing-attribute
+   #:unknown-attribute
+   #:check-attribute
+   #:check-no-unknown-attributes
+   #:check-sole-attribute)
   ;; processor.lisp
   (:export
    #:process

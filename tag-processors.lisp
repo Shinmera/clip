@@ -91,8 +91,8 @@ is done."
 
 (define-tag-processor iterate (node)
   (process-attributes node)
-  (let ((var (plump:attribute node "over")))
-    (plump:remove-attribute node var)
+  (let ((var (check-sole-attribute node "over")))
+    (plump:remove-attribute node "over")
     (process-attribute node "iterate" var)))
 
 (define-tag-processor expand (node)
@@ -111,6 +111,7 @@ is done."
 
 (define-tag-processor splice (node)
   (process-attributes node)
+  (check-no-unknown-attributes node)
   (let* ((first (plump:first-element node))
          (parent (plump:parent node))
          (family (plump:children parent))
@@ -125,6 +126,7 @@ is done."
 
 (define-tag-processor splice-inner (node)
   (process-attributes node)
+  (check-no-unknown-attributes node)
   (let* ((first (plump:first-element node))
          (parent (plump:parent node))
          (family (plump:children parent))
@@ -143,23 +145,27 @@ is done."
 
 (define-tag-processor when (node)
   (process-attributes node)
-  (let ((test (resolve-attribute node "test")))
+  (let ((test (parse-and-resolve (check-sole-attribute node "test"))))
+    (plump:remove-attribute node "test")
     (if test
         (process-tag "splice" node)
         (plump:remove-child node))))
 
 (define-tag-processor unless (node)
   (process-attributes node)
-  (let ((test (resolve-attribute node "test")))
+  (let ((test (parse-and-resolve (check-sole-attribute node "test"))))
+    (plump:remove-attribute node "test")
     (if test
         (plump:remove-child node)
         (process-tag "splice" node))))
 
 (define-tag-processor if (node)
   (process-attributes node)
+  (check-no-unknown-attributes node "test")
   (let* ((parent (plump:parent node))
          (pos (position node (plump:children parent)))
          (then) (else) (test (plump:attribute node "test")))
+    (plump:remove-attribute node "test")
     ;; Gather elements
     (loop for child across (plump:children node)
           when (plump:element-p child)
@@ -172,6 +178,8 @@ is done."
                (when (and (not else) (or (string-equal (plump:tag-name child) "else")
                                          (string-equal (plump:tag-name child) "c:else")))
                  (setf else child)))
+    (unless test
+      (error 'missing-attribute :attribute "test" :node node))
     ;; Parse test
     (when (stringp test)
       (setf test (resolve-value (read-from-string test))))
@@ -194,11 +202,12 @@ is done."
 
 (define-tag-processor using (node)
   (process-attributes node)
-  (with-clipboard-bound ((resolve-attribute node "value"))
+  (with-clipboard-bound ((parse-and-resolve (check-sole-attribute node "value")))
     (process-children node)
     (process-tag "splice" node)))
 
 (define-tag-processor import (node)
   (let ((path (merge-pathnames (resolve-attribute node "file"))))
+    (plump:remove-attribute node "file")
     (plump:parse path :root node)
     (process-tag "splice" node)))

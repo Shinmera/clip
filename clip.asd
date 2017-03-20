@@ -19,6 +19,7 @@
   :serial T
   :components ((:file "package")
                (:file "toolkit")
+               (:file "conditions")
                (:file "clipboard")
                (:file "attr-processors")
                (:file "tag-processors")
