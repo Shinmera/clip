@@ -203,6 +203,7 @@ is done."
 (define-tag-processor using (node)
   (process-attributes node)
   (with-clipboard-bound ((parse-and-resolve (check-sole-attribute node "value")))
+    (plump:remove-attribute node "value")
     (process-children node)
     (process-tag "splice" node)))
 
