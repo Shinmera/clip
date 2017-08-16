@@ -4,10 +4,6 @@
  Author: Nicolas Hafner <shinmera@tymoon.eu>
 |#
 
-(defpackage org.tymoonnext.clip.asdf
-  (:use :cl :asdf))
-(in-package :org.tymoonnext.clip.asdf)
-
 (defsystem clip
   :name "Clip HTML Processor"
   :version "0.6.0"
