@@ -70,12 +70,13 @@ See PROCESS-ATTRIBUTE."
 (define-attribute-processor iterate (node value)
   (let ((val (parse-and-resolve value))
         (new-children (plump:make-child-array))
-        (target (plump:first-element node)))
+        (target node))
     (flet ((process (item)
              (with-clipboard-bound (item)
-               (vector-push-extend
-                (process-node (plump:clone-node target))
-                new-children))))
+               (let ((clone (plump:clone-node target T)))
+                 (loop for node across (plump:children clone)
+                       do (process-node node))
+                 (array-utils:vector-append new-children (plump:children clone))))))
       (etypecase val
         (list (loop for item in val do (process item)))
         (vector (loop for item across val do (process item)))))
