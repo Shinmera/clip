@@ -11,7 +11,9 @@
   :author "Nicolas Hafner <shinmera@tymoon.eu>"
   :maintainer "Nicolas Hafner <shinmera@tymoon.eu>"
   :description "An HTML templating engine using Plump."
-  :homepage "https://github.com/Shinmera/clip"
+  :homepage "https://Shinmera.github.io/clip/"
+  :bug-tracker "https://github.com/Shinmera/clip/issues"
+  :source-control (:git "https://github.com/Shinmera/clip.git")
   :serial T
   :components ((:file "package")
                (:file "toolkit")
