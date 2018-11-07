@@ -87,6 +87,7 @@ is done."
              (plump:attributes node))
     (with-clipboard-bound ((make-instance 'clipboard :env table))
       (process-children node))
+    (clrhash (plump:attributes node))
     (process-tag "splice" node)))
 
 (define-tag-processor iterate (node)
