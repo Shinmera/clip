@@ -54,8 +54,7 @@ If such functionality is indeed ever needed (I hope not), this system
 needs to be rewritten to somehow be able to cope with such scenarios. "
   (loop for i from 0 ;; We do this manually to allow growing size of the array.
         while (< i (length (plump:children node)))
-        for child = (aref (plump:children node) i)
-        do (process-node child))
+        do (process-node (aref (plump:children node) i)))
   node)
 
 (defun process-node (node)
