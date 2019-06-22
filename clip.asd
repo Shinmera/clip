@@ -7,7 +7,7 @@
 (defsystem clip
   :name "Clip HTML Processor"
   :version "0.6.0"
-  :license "Artistic"
+  :license "zlib"
   :author "Nicolas Hafner <shinmera@tymoon.eu>"
   :maintainer "Nicolas Hafner <shinmera@tymoon.eu>"
   :description "An HTML templating engine using Plump."
