@@ -6,7 +6,7 @@
 
 (defsystem clip
   :name "Clip HTML Processor"
-  :version "0.6.0"
+  :version "0.7.0"
   :license "zlib"
   :author "Nicolas Hafner <shinmera@tymoon.eu>"
   :maintainer "Nicolas Hafner <shinmera@tymoon.eu>"

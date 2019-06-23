@@ -25,7 +25,7 @@ The value returned by `PROCESS` is the node you passed into it. You can parse th
 * `C:EXPAND` <br />
   This tag expands its attributes and then calls `PROCESS-NODE` on itself again. This is useful to generate attributes to be expanded.
 * `C:IF` <br />
-  Looks for either a `TEST` attribute or a `C:TEST` tag as one of its direct children. If the test as by `RESOLVE-VALUE` is non-NIL, all children of the `C:THEN` tag are spliced in place of the IF block. Otherwise the same is done for the `C:ELSE` block. If neither `C:THEN` or `C:ELSE` blocks are found as direct children of the `C:IF`, the `C:IF` is simply removed from the DOM.
+  Looks for either a `TEST` attribute or a `C:TEST` tag as one of its direct children. If the test as by `RESOLVE-VALUE` is non-NIL, all children of the `C:THEN` tag are spliced in place of the `C:IF` block. Otherwise it looks for `C:ELSEIF` blocks and checks their `TEST` attributes in turn. The contents of the first block whose `TEST` passes is spliced. If none pass, the `C:ELSE` child block, if any, is spliced.
 * `C:ITERATE` <br />
   Looks for one attribute called `OVER` and then works like the `ITERATE` attribute processor using the value of the `OVER` attribute.
 * `C:LET` <br />

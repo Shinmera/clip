@@ -164,7 +164,7 @@ is done."
   (check-no-unknown-attributes node "test")
   (let* ((parent (plump:parent node))
          (pos (position node (plump:children parent)))
-         (then) (else) (test (plump:attribute node "test")))
+         (then) (elseif) (else) (test (plump:attribute node "test")))
     (plump:remove-attribute node "test")
     ;; Gather elements
     (loop for child across (plump:children node)
@@ -175,6 +175,9 @@ is done."
                (when (and (not then) (or (string-equal (plump:tag-name child) "then")
                                          (string-equal (plump:tag-name child) "c:then")))
                  (setf then child))
+               (when (or (string-equal (plump:tag-name child) "elseif")
+                         (string-equal (plump:tag-name child) "c:elseif"))
+                 (push child elseif))
                (when (and (not else) (or (string-equal (plump:tag-name child) "else")
                                          (string-equal (plump:tag-name child) "c:else")))
                  (setf else child)))
@@ -191,14 +194,17 @@ is done."
                  (splice-into parent pos children)
                  ;; We need to splice the first since it is in-place of the if.
                  (process-node (aref children 0))))))
-      (cond
-        ((and then test)
-         (when else (plump:remove-child else))
-         (splice then))
-        (else
-         (when then (plump:remove-child then))
-         (splice else))
-        (T (plump:remove-child node))))))
+      (if test
+          (if then
+              (splice then)
+              (plump:remove-child node))
+          (loop for child in elseif
+                when (resolve-value (read-from-string (plump:attribute child "test")))
+                do (splice child)
+                   (return T)
+                finally (if else
+                            (splice else)
+                            (plump:remove-child node)))))))
 
 (define-tag-processor using (node)
   (process-attributes node)
