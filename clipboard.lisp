@@ -70,7 +70,7 @@ If you want to get special treatment of objects or types, define your own method
     ((keywordp (first model))
      (getf model (make-keyword field)))
     ((listp (first model))
-     (cdr (assoc field model :test #'equalp)))
+     (cdr (assoc field model :test #'string-equal)))
     (T
      (error "Model is of type LIST, but is neither an ALIST or PLIST."))))
 
@@ -79,7 +79,7 @@ If you want to get special treatment of objects or types, define your own method
     ((keywordp (first model))
      (setf (getf model (make-keyword field)) value))
     ((listp (first model))
-     (setf (cdr (assoc field model :test #'equalp)) value))
+     (setf (cdr (assoc field model :test #'string-equal)) value))
     (T
      (error "Model is of type LIST, but is neither an ALIST or PLIST."))))
 
