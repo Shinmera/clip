@@ -198,7 +198,7 @@ is done."
           (if then
               (splice then)
               (plump:remove-child node))
-          (loop for child in elseif
+          (loop for child in (nreverse elseif)
                 when (resolve-value (read-from-string (plump:attribute child "test")))
                 do (splice child)
                    (return T)
