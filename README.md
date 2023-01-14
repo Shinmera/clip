@@ -67,7 +67,7 @@ The Emacs extension [Web-Mode](http://web-mode.org/)(version 9.0.77+) provides s
 ## Tutorials
 These are short tutorials to help explaining the effects of each tag and to illustrate some basic templating techniques. The examples will only work with Clip>=0.5.1 and lQuery>=3.1.1 .
 
-###Updating a node with values
+### Updating a node with values
 
     (clip:process-to-string
      "<span lquery=\"(text text) (add-class class)\" />"
