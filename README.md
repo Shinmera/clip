@@ -40,6 +40,8 @@ The value returned by `PROCESS` is the node you passed into it. You can parse th
   Binds the clipboard to the resolved-value of its `VALUE` attribute. Acts like `SPLICE`.
 * `C:WHEN` <br />
   Looks for a `TEST` attribute and if the value of it as by `RESOLVE-VALUE` is non-NIL, acts like `SPLICE`. Otherwise it removes itself including its children from the DOM.
+* `C:S` <br />
+  A shorthand for `<c:splice lquery="(text ...)"></c:splice` where ... is the contents of the element.
 
 If you specify attributes that are not known on a standard tag, a warning of type `UNKNOWN-ATTRIBUTE` is signalled. If you do not specify a required attribute on a standard tag, an error of type `MISSING-ATTRIBUTE` is signalled.
 
