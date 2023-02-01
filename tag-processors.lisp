@@ -243,5 +243,4 @@ is done."
 (define-tag-processor s (node)
   (process-attributes node)
   (lquery:$1 node (text (resolve-value (read-from-string (plump:text node)))))
-  (let ((parent (plump:parent node)))
-    (splice-into parent (position node (plump:children parent)) (plump:children node))))
+  (process-tag "splice" node))
