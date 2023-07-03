@@ -1,15 +1,9 @@
-#|
- This file is a part of Clip
- (c) 2014 Shirakumo http://tymoon.eu (shinmera@tymoon.eu)
- Author: Nicolas Hafner <shinmera@tymoon.eu>
-|#
-
 (defsystem clip
   :name "Clip HTML Processor"
   :version "0.7.0"
   :license "zlib"
-  :author "Nicolas Hafner <shinmera@tymoon.eu>"
-  :maintainer "Nicolas Hafner <shinmera@tymoon.eu>"
+  :author "Yukari Hafner <shinmera@tymoon.eu>"
+  :maintainer "Yukari Hafner <shinmera@tymoon.eu>"
   :description "An HTML templating engine using Plump."
   :homepage "https://Shinmera.github.io/clip/"
   :bug-tracker "https://github.com/Shinmera/clip/issues"
