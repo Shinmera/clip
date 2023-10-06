@@ -67,10 +67,12 @@ See PROCESS-ATTRIBUTE."
         (target node))
     (flet ((process (item)
              (with-clipboard-bound (item)
-               (let ((clone (plump:clone-node target T)))
-                 (loop for node across (plump:children clone)
-                       do (process-node node))
-                 (array-utils:vector-append new-children (plump:children clone))))))
+               (let* ((clone (plump:clone-node target T))
+                      (children (plump:children clone)))
+                 (loop for i from 0
+                       while (< i (length children))
+                       do (process-node (aref children i)))
+                 (array-utils:vector-append new-children children)))))
       (etypecase val
         (list (loop for item in val do (process item)))
         (vector (loop for item across val do (process item)))))
