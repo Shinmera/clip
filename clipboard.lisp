@@ -88,6 +88,17 @@ If you want to get special treatment of objects or types, define your own method
                             (symbol-package (class-name (class-of model))))))
     (if field (setf (slot-value model field) value))))
 
+(defmethod clip ((model structure-object) field)
+  "Generic slot accessor."
+  (let ((field (find-symbol (string field)
+                            (symbol-package (class-name (class-of model))))))
+    (if field (slot-value model field))))
+
+(defmethod (setf clip) (value (model structure-object) field)
+  (let ((field (find-symbol (string field)
+                            (symbol-package (class-name (class-of model))))))
+    (if field (setf (slot-value model field) value))))
+
 (defgeneric resolve-value (object)
   (:documentation "Attempts to resolve the object to a specific value.
 This is usually used in combination with READ-FROM-STRING of an attribute value."))
