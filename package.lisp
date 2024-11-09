@@ -35,6 +35,7 @@
   ;; processor.lisp
   (:export
    #:process
+   #:process*
    #:process-to-string)
   ;; tag-processors.lisp
   (:export
