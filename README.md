@@ -43,7 +43,9 @@ The value returned by `PROCESS` is the node you passed into it. You can parse th
 * `C:CASE` <br />
   Takes a `VALUE` attribute that each element in the body is compared against, just like CL's `case`. Each element in the body may have a `VALUE` attribute to compare again, or a `VALUES` attribute that is a space-separated list, too.
 * `C:S` <br />
-  A shorthand for `<c:splice lquery="(text ...)"></c:splice` where ... is the contents of the element.
+  A shorthand for `<c:splice lquery="(text ...)"></c:splice>` where ... is the contents of the element.
+* `C:H` <br />
+  A shorthand for `<c:splice lquery="(html ...)"></c:splice>` where ... is the contents of the element.
 
 If you specify attributes that are not known on a standard tag, a warning of type `UNKNOWN-ATTRIBUTE` is signalled. If you do not specify a required attribute on a standard tag, an error of type `MISSING-ATTRIBUTE` is signalled.
 

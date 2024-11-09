@@ -238,3 +238,8 @@ is done."
   (process-attributes node)
   (lquery:$1 node (text (resolve-value (read-from-string (plump:text node)))))
   (process-tag "splice" node))
+
+(define-tag-processor h (node)
+  (process-attributes node)
+  (lquery:$1 node (html (resolve-value (read-from-string (plump:text node)))))
+  (process-tag "splice" node))
