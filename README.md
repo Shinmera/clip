@@ -42,6 +42,8 @@ The value returned by `PROCESS` is the node you passed into it. You can parse th
   Looks for a `TEST` attribute and if the value of it as by `RESOLVE-VALUE` is non-NIL, acts like `SPLICE`. Otherwise it removes itself including its children from the DOM.
 * `C:CASE` <br />
   Takes a `VALUE` attribute that each element in the body is compared against, just like CL's `case`. Each element in the body may have a `VALUE` attribute to compare again, or a `VALUES` attribute that is a space-separated list, too.
+* `C:COND` <br />
+  Takes any number of child elements whose `TEST` attribute is evaluated. The first one which evaluates to true is spliced, or the first ``C:ELSE`` block that is encountered.
 * `C:S` <br />
   A shorthand for `<c:splice lquery="(text ...)"></c:splice>` where ... is the contents of the element.
 * `C:H` <br />

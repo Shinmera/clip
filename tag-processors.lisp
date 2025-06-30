@@ -221,6 +221,23 @@ is done."
                    (return T)))
         (plump:remove-child node))))
 
+(define-tag-processor cond (node)
+  (process-attributes node)
+  (let* ((parent (plump:parent node))
+         (pos (position node (plump:children parent))))
+    (or (loop for child across (plump:children node)
+              when (plump:element-p child)
+              do (when (or (parse-and-resolve (plump:attribute child "test"))
+                           (or (string-equal (plump:tag-name child) "else")
+                               (string-equal (plump:tag-name child) "c:else")))
+                   (let ((children (plump:children child)))
+                     (when (< 0 (length children))
+                       (splice-into parent pos children)
+                       ;; We need to splice the first since it is in-place of the if.
+                       (process-node (aref children 0))))
+                   (return T)))
+        (plump:remove-child node))))
+
 (define-tag-processor using (node)
   (process-attributes node)
   (with-clipboard-bound ((parse-and-resolve (check-sole-attribute node "value")))
