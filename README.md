@@ -1,5 +1,5 @@
 ## About Clip
-Clip is an attempt at a templating library that allows you to write templates in a way that is both accessible to direct webdesign and flexible. The main idea is to incorporate transformation commands into an HTML file through tags and attributes. Clip is heavily dependant on [Plump](https://shinmera.github.io/plump) and [lQuery](https://shinmera.github.io/lquery). 
+Clip is an attempt at a templating library that allows you to write templates in a way that is both accessible to direct webdesign and flexible. The main idea is to incorporate transformation commands into an HTML file through tags and attributes. Clip is heavily dependant on [Plump](https://shinmera.com/docs/plump) and [lQuery](https://shinmera.com/docs/lquery). 
 
 ## How To
 Load Clip through ASDF or Quicklisp.
@@ -83,7 +83,7 @@ These are short tutorials to help explaining the effects of each tag and to illu
 
 Explanation: The `LQUERY` attribute allows you to perform lQuery operations on the node it is an attribute of. In this case, the `TEXT` function sets the text of the node to the value of `TEXT`, which we told Clip to be `"Hi!"`. Similarly for `ADD-CLASS`. Any non-keyword symbol within the template is automatically resolved to a field on the current clipboard. You may think of the clipboard as a form of lexical environment for the template, which we currently set to have the variables `TEXT` and `CLASS` bound. The default `CLIPBOARD` object is special in the sense that it does not differentiate between accessing it with keywords, symbols or strings and is case-insensitive. This makes it easier to access in templates.
 
-Please see the [lQuery](https://shinmera.github.io/lquery) documentation for all possible node manipulation functions.
+Please see the [lQuery](https://shinmera.com/docs/lquery) documentation for all possible node manipulation functions.
 
 ### Populating from a list
 
@@ -140,5 +140,5 @@ You must also be aware of the special resolving for symbols used as function cal
 
 Further Reading
 ---------------
-* [Plump](https://shinmera.github.io/plump)
-* [lQuery](https://shinmera.github.io/lquery)
+* [Plump](https://shinmera.com/docs/plump)
+* [lQuery](https://shinmera.com/docs/lquery)

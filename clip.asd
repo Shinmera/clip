@@ -5,9 +5,9 @@
   :author "Yukari Hafner <shinmera@tymoon.eu>"
   :maintainer "Yukari Hafner <shinmera@tymoon.eu>"
   :description "An HTML templating engine using Plump."
-  :homepage "https://Shinmera.github.io/clip/"
-  :bug-tracker "https://github.com/Shinmera/clip/issues"
-  :source-control (:git "https://github.com/Shinmera/clip.git")
+  :homepage "https://shinmera.com/docs/clip/"
+  :bug-tracker "https://shinmera.com/project/clip/issues"
+  :source-control (:git "https://shinmera.com/project/clip.git")
   :serial T
   :components ((:file "package")
                (:file "toolkit")
